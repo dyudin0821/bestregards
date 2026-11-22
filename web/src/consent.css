@@ -47,4 +47,4 @@
   --cc-toggle-readonly-knob-icon-color:var(--ink);
 }
 #cc-main .cm,#cc-main .pm{border:var(--border);box-shadow:var(--shadow)}
-#cc-main .cm__btn,#cc-main .pm__btn{font-weight:700}
+#cc-main .cm__btn,#cc-main .pm__btn{font-weight:700;min-height:var(--tap)}

@@ -8,6 +8,9 @@
 .panel h2{font-size:28px}
 .label{display:flex;justify-content:space-between;align-items:center;gap:var(--s3);margin-bottom:var(--s2)}
 .actions{display:flex;gap:var(--s3);flex-wrap:wrap}
+/* The main action takes its own row; the secondary ones share the next when they fit, else stack. */
+.actions .btn{flex:1 1 auto;white-space:nowrap}
+.actions .btn-primary{flex-basis:100%}
 .hint-line{margin-top:var(--s2)}
 .notice{border:var(--border);background:var(--surface);padding:var(--s3) var(--s4)}
 .stub{border:2px dashed var(--soft-line);padding:var(--s6) var(--s5);color:var(--muted);min-height:240px;display:grid;place-items:center;text-align:center}
@@ -26,6 +29,7 @@
 [data-split=true][data-view=compose] .output{display:none}
 [data-split=true][data-view=result] .compose,[data-split=true][data-view=result] .history{display:none}
 [data-split=true] .layout{grid-template-columns:1fr;padding-bottom:calc(var(--s7) + env(safe-area-inset-bottom))}
+.start-over{align-self:stretch}
 
 @media (max-width:900px){
   .layout{grid-template-columns:1fr}
@@ -35,6 +39,12 @@
 @media (max-width:640px){
   .topbar .btn{display:none}
   .history .label{flex-wrap:wrap}
+  .history h2 .mono{display:block;margin-top:var(--s1)}
+}
+/* Touch screens: every target at least the design's 48 px, including the compact desktop ones. */
+@media (pointer:coarse){
+  .history .btn{min-height:var(--tap)}
+  .history .label .link,.app-foot a,.app-foot .link{display:inline-flex;align-items:center;min-height:var(--tap)}
 }
 
 /* Loading, error and quota states */
@@ -49,6 +59,7 @@
 .challenge:empty{display:none}
 .quota-text{white-space:nowrap}
 @media (max-width:480px){.quota-label{display:none}}
+@media (max-width:359px){.quota .pips{display:none}}
 
 .app-foot{display:flex;flex-wrap:wrap;gap:var(--s2) var(--s5);padding-top:var(--s5);padding-bottom:calc(var(--s7) + env(safe-area-inset-bottom))}
 .app-foot .link{font:inherit;letter-spacing:inherit;text-transform:inherit;color:inherit}

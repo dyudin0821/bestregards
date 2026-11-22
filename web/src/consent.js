@@ -2,9 +2,22 @@ import 'vanilla-cookieconsent/dist/cookieconsent.css';
 import './consent.css';
 import * as CookieConsent from 'vanilla-cookieconsent';
 import {CONSENT_KEY, CONSENT_REVISION, OPTIONAL, forgetOptional} from './storage.js';
+import {isTelegramLaunch} from './sdk.js';
+
+// Inside Telegram there is no guest login and the screen is a phone: a short notice, and no "Настроить"
+// button, since the only optional category is covered by accept/decline (settings stay in the footer).
+const telegram = typeof window !== 'undefined' && isTelegramLaunch(window.location.hash, window.sessionStorage);
 
 const ru = {
-  consentModal: {
+  consentModal: telegram ? {
+    title: 'Хранение на устройстве',
+    description:
+      'Историю переводов и тему можно сохранять на этом устройстве, на сервер они не уходят. ' +
+      '<a href="/privacy">Подробнее</a>',
+    acceptAllBtn: 'Сохранять',
+    acceptNecessaryBtn: 'Не сохранять',
+    revisionMessage: 'Мы обновили политику конфиденциальности.',
+  } : {
     title: 'Куки и хранилище браузера',
     description:
       'Куки мы не используем. Чтобы сайт работал, браузер хранит ваш гостевой вход. Историю переводов и тему ' +
@@ -27,7 +40,9 @@ const ru = {
       },
       {
         title: 'Необходимое',
-        description: 'Гостевой вход, ваш выбор в этом окне и служебные данные проверки от ботов. Без них сайт не работает.',
+        description: telegram
+          ? 'Ваш выбор в этом окне и служебные данные Telegram для запуска приложения. Без них приложение не работает.'
+          : 'Гостевой вход, ваш выбор в этом окне и служебные данные проверки от ботов. Без них сайт не работает.',
         linkedCategory: 'necessary',
       },
       {

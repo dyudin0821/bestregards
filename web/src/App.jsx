@@ -1,4 +1,5 @@
 import {useCallback, useEffect, useRef, useState} from 'react';
+import {Eraser, Plus} from 'lucide-react';
 import {ApiError, fetchConfig, fetchMe, fetchPairs, loginAsGuest, loginWithTelegram, sendEvents, translateOnServer} from './api.js';
 import {createTracker, newResultId} from './events.js';
 import {findPair, pickPair} from './logic.js';
@@ -42,6 +43,7 @@ export default function App() {
   const [error, setError] = useState('');
   const [limited, setLimited] = useState(false);
   const challengeRef = useRef(null);
+  const sourceRef = useRef(null);
   const configRef = useRef(null);
 
   // A translation that finishes after the user moved on must not replace what they see now.
@@ -167,8 +169,12 @@ export default function App() {
     setText(pair.input);
     setResult(pairResult(pair, true));
   }, [resetOutcome]);
+  // Only on the first load: an emptied field later must stay empty and keep the chosen mode.
+  const seeded = useRef(false);
   useEffect(() => {
-    if (catalog && !result && !text) showPair(pickPair(catalog.pairs, DEFAULT_MODE));
+    if (!catalog || seeded.current) return;
+    seeded.current = true;
+    if (!result && !text) showPair(pickPair(catalog.pairs, DEFAULT_MODE));
   }, [catalog, result, text, showPair]);
 
   const changeMode = next => { showPair(pickPair(pairs, next)); setView('compose'); };
@@ -180,6 +186,10 @@ export default function App() {
     const match = findPair(pairs, mode, value);
     setResult(match ? pairResult(match, true) : null);
   };
+  const clearText = () => { changeText(''); sourceRef.current?.focus(); };
+  // Telegram shows the result as its own screen; its native back arrow is easy to miss, so the screen
+  // also offers a fresh start. Back keeps the text for editing, this empties it.
+  const startOver = () => { changeText(''); setView('compose'); };
 
   const remember = entry => {
     setHistory(current => {
@@ -205,7 +215,7 @@ export default function App() {
 
   const translate = async (previous = '') => {
     const input = text.trim();
-    if (!input) { setNotice('Сначала напишите, что вы на самом деле думаете.'); return; }
+    if (!input) { setNotice(isReverse ? 'Сначала вставьте корпоративный текст.' : 'Сначала напишите, что вы на самом деле думаете.'); return; }
 
     const match = !previous && findPair(pairs, mode, input);
     if (match) {
@@ -285,7 +295,7 @@ export default function App() {
 
   // Telegram's native buttons call whichever handlers are current.
   const actions = useRef({});
-  actions.current = {translate, copy, back: () => setView('compose'), retry: () => translate(lastPrevious.current)};
+  actions.current = {translate, copy, example: randomPair, back: () => setView('compose'), retry: () => translate(lastPrevious.current)};
   useEffect(() => {
     if (view !== 'result') {
       return showMainButton('Перевести', () => actions.current.translate(), {disabled: !catalog || loading});
@@ -293,7 +303,8 @@ export default function App() {
     const stopBack = showBackButton(() => actions.current.back());
     let stopMain;
     if (loading) stopMain = showMainButton('Перевожу…', () => {}, {disabled: true});
-    else if (limited) stopMain = showMainButton('Назад', () => actions.current.back());
+    // Out of AI translations: the one thing left to do is a ready-made example, which is always free.
+    else if (limited) stopMain = showMainButton('Готовый пример', () => actions.current.example());
     else if (error) stopMain = showMainButton('Повторить', () => actions.current.retry());
     else stopMain = showMainButton(copied ? 'Скопировано' : 'Скопировать', () => actions.current.copy());
     return () => { stopMain(); stopBack(); };
@@ -338,7 +349,7 @@ export default function App() {
             {catalog && <ModeSwitch modes={modes} value={mode} onChange={changeMode} />}
             <div className="field">
               <label className="mono" htmlFor="source">{isReverse ? 'Корпоративный текст' : 'Как есть'}</label>
-              <textarea id="source" value={text} maxLength={MAX_LENGTH} placeholder="Напишите, что думаете на самом деле…"
+              <textarea id="source" ref={sourceRef} value={text} maxLength={MAX_LENGTH} placeholder={isReverse ? 'Вставьте письмо или сообщение на корпоративном…' : 'Напишите, что думаете на самом деле…'}
                 onChange={e => changeText(e.target.value)} />
               <div className="hint mono muted">
                 <span>{result?.preview ? 'Готовый пример · без AI' : ''}</span>
@@ -360,6 +371,7 @@ export default function App() {
             <div className="actions">
               {!inTelegram && <button type="button" className="btn btn-primary" onClick={() => translate()} disabled={!catalog || loading}>Перевести</button>}
               <RandomButton onClick={randomPair} />
+              {text && <button type="button" className="btn" onClick={clearText}><Eraser size={18} aria-hidden="true" />Очистить</button>}
             </div>
           </section>
 
@@ -377,7 +389,12 @@ export default function App() {
               </>
             )}
             {!loading && !limited && !error && !result && (
-              <div className="stub"><p>Здесь появится готовый текст.<br />Вставьте мысль слева или возьмите случайный пример.</p></div>
+              <div className="stub"><p>Здесь появится готовый текст.<br />{isReverse ? 'Вставьте корпоративный текст' : 'Напишите, что думаете,'} или возьмите случайный пример.</p></div>
+            )}
+            {inTelegram && !loading && !limited && (
+              <button type="button" className="btn start-over" onClick={startOver}>
+                <Plus size={18} aria-hidden="true" />Новый перевод
+              </button>
             )}
           </section>
         </div>

@@ -72,7 +72,7 @@ export function History({items, modes, onOpen, onClear}) {
     <section className="history" aria-labelledby="history-title">
       <div className="label">
         <h2 id="history-title">История <span className="mono muted">хранится только на этом устройстве</span></h2>
-        <button type="button" className="link" onClick={onClear}>Очистить</button>
+        <button type="button" className="link" onClick={onClear}>Очистить историю</button>
       </div>
       <ul>
         {items.map(item => (
@@ -152,11 +152,18 @@ export function LimitMemo({quota, guest, botLink}) {
 
 export function QuotaMeter({quota}) {
   if (!quota) return null;
+  if (quota.unlimited) {
+    return (
+      <div className="quota" title="Администратор: без суточного лимита">
+        <span className="mono quota-text"><span className="quota-label">Сегодня </span>без лимита</span>
+      </div>
+    );
+  }
   const pips = Array.from({length: quota.limit}, (_, i) => i < quota.remaining);
   return (
     <div className="quota" title="Бесплатные AI-переводы на сегодня">
       <div className="pips" aria-hidden="true">{pips.map((on, i) => <i key={i} className={on ? 'on' : ''} />)}</div>
-      <span className="mono quota-text"><span className="quota-label">Сегодня: </span>{quota.remaining} из {quota.limit}</span>
+      <span className="mono quota-text"><span className="quota-label">Сегодня </span>ещё {quota.remaining} из {quota.limit}</span>
     </div>
   );
 }

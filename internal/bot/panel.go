@@ -200,7 +200,11 @@ func (h *Handler) userPanel(ctx context.Context, id int64) (Panel, error) {
 	if c.User.Banned {
 		b.WriteString("Заблокирован: да\n")
 	}
-	fmt.Fprintf(&b, "\nПереводов сегодня: %d из %d", c.FreeUsed, c.FreeLimit)
+	if c.Unlimited {
+		fmt.Fprintf(&b, "\nПереводов сегодня: %d (администратор, без лимита)", c.FreeUsed)
+	} else {
+		fmt.Fprintf(&b, "\nПереводов сегодня: %d из %d", c.FreeUsed, c.FreeLimit)
+	}
 	return Panel{Text: b.String(), Rows: nav(cbUserPre + strconv.FormatInt(id, 10))}, nil
 }
 

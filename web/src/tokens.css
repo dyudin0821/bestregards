@@ -38,11 +38,14 @@ svg{flex-shrink:0;vertical-align:middle}
 
 /* Кнопки */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--s2);min-height:var(--tap);padding:0 var(--s5);border:var(--border);background:var(--surface);color:var(--ink);font:700 16px/1 var(--font);text-decoration:none;cursor:pointer;transition:transform .12s,box-shadow .12s,background .12s}
-.btn:hover{background:var(--paper)}
+/* Hover only where a pointer can hover: on touch screens it would stick after a tap. */
+@media (hover:hover){
+  .btn:hover{background:var(--paper)}
+  .btn-primary:hover{background:var(--accent);box-shadow:6px 6px 0 var(--ink)}
+  [data-theme=dark] .btn-primary:hover{box-shadow:6px 6px 0 #fff}
+}
 .btn:active{transform:translate(2px,2px)}
 .btn-primary{background:var(--accent);color:var(--on-accent);box-shadow:var(--shadow);border-color:#111}
-.btn-primary:hover{background:var(--accent);box-shadow:6px 6px 0 var(--ink)}
-[data-theme=dark] .btn-primary:hover{box-shadow:6px 6px 0 #fff}
 .btn-primary:active{box-shadow:2px 2px 0 var(--ink)}
 .btn-block{width:100%}
 .btn[disabled]{opacity:.45;cursor:not-allowed;box-shadow:none}
@@ -94,5 +97,10 @@ svg{flex-shrink:0;vertical-align:middle}
   .seg{grid-template-columns:repeat(2,1fr)}
   .seg button:nth-child(2){border-right:0}
   .seg button:nth-child(-n+2){border-bottom:var(--border)}
+}
+/* Phones: the levels become a list, so labels stay on one line and never widen the page. */
+@media (max-width:480px){
+  .level{grid-template-columns:1fr}
+  .level button{flex-direction:row;align-items:center;gap:var(--s3)}
 }
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}

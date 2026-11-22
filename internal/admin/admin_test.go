@@ -109,3 +109,11 @@ func TestUserCard(t *testing.T) {
 		t.Fatalf("unknown user: %v", err)
 	}
 }
+
+func TestUserCardMarksAnUnlimitedOperator(t *testing.T) {
+	f := &fakeReader{users: map[int64]user.User{42: {ID: 42}}}
+	svc := New(f, Config{Unlimited: map[int64]bool{42: true}})
+	if c, err := svc.User(context.Background(), 42); err != nil || !c.Unlimited {
+		t.Fatalf("%+v %v", c, err)
+	}
+}

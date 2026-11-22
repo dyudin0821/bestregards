@@ -374,11 +374,12 @@ type quotaJSON struct {
 	Limit     int       `json:"limit"`
 	Used      int       `json:"used"`
 	Remaining int       `json:"remaining"`
+	Unlimited bool      `json:"unlimited,omitempty"`
 	ResetsAt  time.Time `json:"resetsAt"`
 }
 
 func toQuotaJSON(q translate.Quota) quotaJSON {
-	return quotaJSON{Limit: q.Limit, Used: q.Used, Remaining: q.Remaining(), ResetsAt: q.ResetsAt}
+	return quotaJSON{Limit: q.Limit, Used: q.Used, Remaining: q.Remaining(), Unlimited: q.Unlimited, ResetsAt: q.ResetsAt}
 }
 
 func (s *Server) me(w http.ResponseWriter, r *http.Request) {

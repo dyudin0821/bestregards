@@ -211,6 +211,27 @@ func TestQuotaExhausted(t *testing.T) {
 	}
 }
 
+func TestUnlimitedUserIsNotStoppedByTheQuotaButIsByTheCeiling(t *testing.T) {
+	e := setup(t, func(c *Config) { c.Unlimited = map[int64]bool{alice.ID: true} })
+	e.books.used[alice.ID] = limits.FreeDaily
+
+	got, err := e.svc.Translate(context.Background(), alice, own)
+	if err != nil {
+		t.Fatalf("an unlimited user past the daily quota: %v", err)
+	}
+	if !got.Quota.Unlimited || got.Quota.Used != limits.FreeDaily+1 {
+		t.Errorf("the translation is still counted: %+v", got.Quota)
+	}
+	if q, err := e.svc.Status(context.Background(), alice); err != nil || !q.Unlimited {
+		t.Errorf("status: %+v %v", q, err)
+	}
+
+	e.books.spent = ceiling
+	if _, err := e.svc.Translate(context.Background(), alice, own); !errors.Is(err, ErrBudgetExhausted) {
+		t.Fatalf("the spending ceiling still applies: err = %v", err)
+	}
+}
+
 func TestAdUserGetsSmallerFirstDayQuota(t *testing.T) {
 	e := setup(t)
 	fromAd := user.User{ID: 9, Source: "tt_launch", CreatedAt: now.Add(-time.Hour)}

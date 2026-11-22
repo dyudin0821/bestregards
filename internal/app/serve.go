@@ -135,6 +135,7 @@ func newTranslator(cfg config.Config, db *store.Store, rec events.Recorder, cata
 		Location: cfg.QuotaLocation, Logger: log,
 		Prices:           limits.Prices{InputPerMtok: cfg.AI.PriceInputUSD, OutputPerMtok: cfg.AI.PriceOutputUSD},
 		DailyBudgetMicro: int64(cfg.AI.FreeBudgetUSD * 1_000_000), MaxOutputTokens: ai.MaxOutputTokens,
+		Unlimited: adminSet(cfg.Telegram.AdminIDs),
 	}
 	if cfg.AI.Key == "" {
 		log.Warn("AI_API_KEY is not set: only ready-made pairs can be translated")

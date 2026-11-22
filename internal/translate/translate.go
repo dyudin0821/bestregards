@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"math"
 	"strings"
 	"time"
 	"unicode/utf8"
@@ -70,11 +71,13 @@ const (
 	SourceAI   Source = "ai"
 )
 
-// Quota is the user's free allowance for the current day.
+// Quota is the user's free allowance for the current day. An unlimited user (an operator) has no
+// daily cap; Limit is then the regular one and only informative, Used still counts.
 type Quota struct {
-	Limit    int
-	Used     int
-	ResetsAt time.Time
+	Limit     int
+	Used      int
+	Unlimited bool
+	ResetsAt  time.Time
 }
 
 // Remaining is how many free translations are left today.
@@ -155,6 +158,9 @@ type Config struct {
 	Location         *time.Location
 	Now              func() time.Time
 	Logger           *slog.Logger
+	// Unlimited lists users exempt from the daily quota (the operators). The spending ceiling still
+	// applies to them: it is what protects the money.
+	Unlimited map[int64]bool
 }
 
 // Service implements the translation use cases. The wiring is private so that what New validated
@@ -204,7 +210,19 @@ func (s *Service) Status(ctx context.Context, u user.User) (Quota, error) {
 }
 
 func (s *Service) quota(u user.User, now time.Time, used int) Quota {
-	return Quota{Limit: limits.DailyLimit(u, now, s.cfg.Location), Used: used, ResetsAt: limits.ResetsAt(now, s.cfg.Location)}
+	return Quota{
+		Limit: limits.DailyLimit(u, now, s.cfg.Location), Used: used, Unlimited: s.cfg.Unlimited[u.ID],
+		ResetsAt: limits.ResetsAt(now, s.cfg.Location),
+	}
+}
+
+// reserveLimit is the cap for the atomic reservation. Unlimited users still go through it, so their
+// translations are counted and refunded like everyone else's.
+func (s *Service) reserveLimit(u user.User, now time.Time) int {
+	if s.cfg.Unlimited[u.ID] {
+		return math.MaxInt32
+	}
+	return limits.DailyLimit(u, now, s.cfg.Location)
 }
 
 // Translate returns a ready-made pair for free when the text matches one, otherwise it translates
@@ -266,7 +284,7 @@ type funding struct {
 // fund reserves what pays for a translation: one unit of the daily allowance and room under the
 // daily spending ceiling.
 func (s *Service) fund(ctx context.Context, u user.User, req Request, now, day time.Time) (funding, error) {
-	limit := limits.DailyLimit(u, now, s.cfg.Location)
+	limit := s.reserveLimit(u, now)
 	stopped := false
 	if s.cfg.Switch != nil {
 		var err error

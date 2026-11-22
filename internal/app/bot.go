@@ -22,10 +22,7 @@ func enableBot(opts *server.Options, cfg config.Config, db *store.Store, log *sl
 	if err != nil {
 		return err
 	}
-	admins := make(map[int64]bool, len(tg.AdminIDs))
-	for _, id := range tg.AdminIDs {
-		admins[id] = true
-	}
+	admins := adminSet(tg.AdminIDs)
 	if len(admins) == 0 {
 		log.Warn("ADMIN_IDS is empty: the /admin panel is available to nobody")
 	}
@@ -35,6 +32,7 @@ func enableBot(opts *server.Options, cfg config.Config, db *store.Store, log *sl
 		Admins:   admins,
 		Admin: admin.New(db, admin.Config{
 			CeilingMicro: int64(cfg.AI.FreeBudgetUSD * 1_000_000), Location: cfg.QuotaLocation,
+			Unlimited: admins,
 		}),
 		AppURL: tg.PublicURL + "/app",
 		Log:    log,
@@ -61,4 +59,13 @@ func SetupWebhook(ctx context.Context, cfg config.Config, log *slog.Logger) erro
 	}
 	log.Info("webhook registered", "url", url)
 	return nil
+}
+
+// adminSet turns ADMIN_IDS into a lookup: who may use /admin and who has no daily quota.
+func adminSet(ids []int64) map[int64]bool {
+	set := make(map[int64]bool, len(ids))
+	for _, id := range ids {
+		set[id] = true
+	}
+	return set
 }

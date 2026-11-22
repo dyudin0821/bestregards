@@ -63,6 +63,7 @@ type Card struct {
 	User      user.User
 	FreeUsed  int
 	FreeLimit int
+	Unlimited bool // an operator: no daily quota
 }
 
 // Reader is the read side of the store.
@@ -85,6 +86,7 @@ type Config struct {
 	CeilingMicro int64
 	Location     *time.Location
 	Now          func() time.Time
+	Unlimited    map[int64]bool // users without a daily quota, as the translator sees them
 }
 
 // Service implements the panel's use cases.
@@ -176,7 +178,7 @@ func (s *Service) User(ctx context.Context, id int64) (Card, error) {
 	if err != nil {
 		return Card{}, fmt.Errorf("quota: %w", err)
 	}
-	return Card{User: u, FreeUsed: used, FreeLimit: limits.DailyLimit(u, now, s.cfg.Location)}, nil
+	return Card{User: u, FreeUsed: used, FreeLimit: limits.DailyLimit(u, now, s.cfg.Location), Unlimited: s.cfg.Unlimited[id]}, nil
 }
 
 // FreeStopped reports whether an admin has switched AI translations off.
