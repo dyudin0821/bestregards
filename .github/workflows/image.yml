@@ -48,6 +48,7 @@ jobs:
           format: sarif
           output: trivy-results.sarif
           severity: CRITICAL,HIGH
+          limit-severities-for-sarif: true # without it the severity filter is ignored for SARIF and UNKNOWN findings fail the step
           ignore-unfixed: true # a finding nobody can fix yet should not block a deploy
           exit-code: "1"
 
