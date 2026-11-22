@@ -1,0 +1,32 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: bestregards # also the "job" label of the metrics: the alert rules expect job="bestregards"
+  labels:
+    app.kubernetes.io/name: bestregards
+    app.kubernetes.io/component: app
+spec:
+  selector:
+    app.kubernetes.io/name: bestregards
+    app.kubernetes.io/component: app
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+    # In-cluster only: no route points at it, and the NetworkPolicy admits only the monitoring namespace.
+    - name: metrics
+      port: 9090
+      targetPort: metrics
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: bestregards
+  labels:
+    app.kubernetes.io/name: bestregards
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: bestregards
+      app.kubernetes.io/component: app

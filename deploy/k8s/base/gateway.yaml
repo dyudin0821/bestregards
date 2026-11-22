@@ -1,0 +1,39 @@
+# Public entry, as Gateway API objects: the Gateway terminates TLS, the routes send traffic to the Service.
+# Needs the Gateway API CRDs (standard channel, v1.2 or newer) and a controller for gatewayClassName
+# (Envoy Gateway, Cilium, Istio, NGINX Gateway Fabric...). Telegram calls POST /bot/webhook over https,
+# so the site must be reachable on a public address with a valid certificate.
+#
+# If the cluster already has a shared Gateway, drop this object and point the parentRefs of the routes
+# in httproute.yaml at it instead (name, namespace, sectionName); it must allow routes from this namespace.
+apiVersion: gateway.networking.k8s.io/v1
+kind: Gateway
+metadata:
+  name: bestregards
+  labels:
+    app.kubernetes.io/name: bestregards
+  # With cert-manager's Gateway API support enabled, this annotation makes it issue the certificate for
+  # the https listener into the bestregards-tls Secret:
+  # annotations:
+  #   cert-manager.io/cluster-issuer: letsencrypt
+spec:
+  gatewayClassName: envoy-gateway # EDIT: the class your controller provides (kubectl get gatewayclass)
+  listeners:
+    - name: https
+      protocol: HTTPS
+      port: 443
+      hostname: bestregards.example
+      tls:
+        mode: Terminate
+        certificateRefs:
+          - name: bestregards-tls
+      allowedRoutes:
+        namespaces:
+          from: Same
+    # Plain http exists only to redirect to https (see bestregards-redirect).
+    - name: http
+      protocol: HTTP
+      port: 80
+      hostname: bestregards.example
+      allowedRoutes:
+        namespaces:
+          from: Same

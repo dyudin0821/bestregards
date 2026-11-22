@@ -1,0 +1,98 @@
+/* Токены bestregards. Тема задаётся атрибутом data-theme на <html> (в Mini App — из Telegram.colorScheme). */
+:root,[data-theme=light]{
+  --paper:#f4f4f0;--surface:#fff;--ink:#111;--muted:#55554f;--line:#111;--soft-line:#cfcfc8;
+  --accent:#d7ff3a;--on-accent:#111;--danger:#b3261e;
+  --shadow:4px 4px 0 var(--ink);
+  --font:'Golos Text Variable','Golos Text',system-ui,sans-serif;--mono:'IBM Plex Mono',ui-monospace,monospace;
+  --s1:4px;--s2:8px;--s3:12px;--s4:16px;--s5:24px;--s6:32px;--s7:48px;--s8:72px;
+  --border:2px solid var(--line);--tap:48px;
+  color-scheme:light;
+}
+[data-theme=dark]{
+  --paper:#0e0e0e;--surface:#181818;--ink:#f3f3ee;--muted:#a6a69f;--line:#f3f3ee;--soft-line:#3a3a36;
+  --accent:#d7ff3a;--on-accent:#111;--danger:#ff8a80;
+  --shadow:4px 4px 0 var(--accent);
+  color-scheme:dark;
+}
+[data-theme]{--border:2px solid var(--line)}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 16px/1.5 var(--font);-webkit-font-smoothing:antialiased}
+h1,h2,h3{margin:0;font-weight:800;letter-spacing:-.02em;line-height:1.05;text-wrap:balance}
+h1{font-size:clamp(40px,7vw,88px);font-weight:900}
+h2{font-size:clamp(28px,4vw,48px)}
+h3{font-size:20px;line-height:1.2}
+p{margin:0}
+a{color:inherit}
+svg{flex-shrink:0;vertical-align:middle}
+:focus-visible{outline:3px solid var(--ink);outline-offset:3px}
+[data-theme=dark] :focus-visible{outline-color:var(--accent)}
+
+.wrap{max-width:1200px;margin:0 auto;padding:0 var(--s5)}
+.mono{font-family:var(--mono);font-size:12px;letter-spacing:.04em;text-transform:uppercase}
+.muted{color:var(--muted)}
+
+/* Бренд */
+.brand{display:inline-flex;align-items:center;gap:var(--s2);font-weight:800;letter-spacing:-.02em;text-decoration:none}
+.brand b{display:inline-grid;place-items:center;width:28px;height:28px;background:var(--accent);color:var(--on-accent);border:2px solid #111;font-size:15px}
+
+/* Кнопки */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:var(--s2);min-height:var(--tap);padding:0 var(--s5);border:var(--border);background:var(--surface);color:var(--ink);font:700 16px/1 var(--font);text-decoration:none;cursor:pointer;transition:transform .12s,box-shadow .12s,background .12s}
+.btn:hover{background:var(--paper)}
+.btn:active{transform:translate(2px,2px)}
+.btn-primary{background:var(--accent);color:var(--on-accent);box-shadow:var(--shadow);border-color:#111}
+.btn-primary:hover{background:var(--accent);box-shadow:6px 6px 0 var(--ink)}
+[data-theme=dark] .btn-primary:hover{box-shadow:6px 6px 0 #fff}
+.btn-primary:active{box-shadow:2px 2px 0 var(--ink)}
+.btn-block{width:100%}
+.btn[disabled]{opacity:.45;cursor:not-allowed;box-shadow:none}
+.link{background:none;border:0;padding:0;font:inherit;color:var(--ink);text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+
+/* Метки и бейджи */
+.tag{display:inline-flex;align-items:center;gap:6px;padding:4px 8px;border:var(--border);font:500 12px/1 var(--mono);letter-spacing:.04em;text-transform:uppercase;background:var(--surface)}
+.tag-accent{background:var(--accent);color:var(--on-accent);border-color:#111}
+
+/* Поле ввода */
+.field{display:block}
+.field>label{display:block;margin-bottom:var(--s2)}
+.field textarea{display:block;width:100%;min-height:132px;resize:vertical;padding:var(--s4);border:var(--border);background:var(--surface);color:var(--ink);font:400 18px/1.45 var(--font);border-radius:0}
+.field textarea::placeholder{color:var(--muted)}
+.field .hint{display:flex;justify-content:space-between;margin-top:var(--s2)}
+
+/* Режимы — сегментированный переключатель */
+.seg{display:grid;grid-template-columns:repeat(4,1fr);border:var(--border);background:var(--surface)}
+.seg button{min-height:var(--tap);padding:var(--s2) var(--s3);border:0;border-right:var(--border);background:none;color:var(--ink);font:600 14px/1.15 var(--font);cursor:pointer}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed=true]{background:var(--ink);color:var(--paper)}
+
+/* Уровень — три ступени */
+.level{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s2)}
+.level button{display:flex;flex-direction:column;align-items:flex-start;gap:var(--s2);min-height:var(--tap);padding:var(--s3);border:var(--border);background:var(--surface);color:var(--ink);text-align:left;font:600 14px/1.2 var(--font);cursor:pointer}
+.level .bars{display:flex;gap:3px}
+.level .bars i{display:block;width:14px;height:6px;border:2px solid currentColor}
+.level .bars i.on{background:currentColor}
+.level button[aria-pressed=true]{background:var(--accent);color:var(--on-accent);border-color:#111}
+
+/* Результат — служебная записка */
+.memo{border:var(--border);background:var(--surface);box-shadow:var(--shadow)}
+.memo-head{display:flex;justify-content:space-between;gap:var(--s3);padding:var(--s3) var(--s4);border-bottom:var(--border);background:var(--paper)}
+.memo-body{padding:var(--s5) var(--s4);font-size:20px;line-height:1.45}
+.memo-foot{display:flex;flex-wrap:wrap;gap:var(--s2);padding:var(--s3) var(--s4);border-top:var(--border)}
+.memo-foot .btn{flex:1 1 auto}
+
+/* Квота */
+.quota{display:flex;align-items:center;gap:var(--s3)}
+.quota .pips{display:flex;gap:4px}
+.quota .pips i{width:12px;height:12px;border:2px solid var(--ink)}
+.quota .pips i.on{background:var(--ink)}
+
+/* Уведомление */
+.toast{display:inline-flex;align-items:center;gap:var(--s2);padding:var(--s3) var(--s4);background:var(--ink);color:var(--paper);font-weight:600}
+
+@media (max-width:640px){
+  .wrap{padding:0 var(--s4)}
+  .seg{grid-template-columns:repeat(2,1fr)}
+  .seg button:nth-child(2){border-right:0}
+  .seg button:nth-child(-n+2){border-bottom:var(--border)}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}

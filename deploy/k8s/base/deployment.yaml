@@ -1,0 +1,105 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bestregards
+  labels:
+    app.kubernetes.io/name: bestregards
+    app.kubernetes.io/component: app
+spec:
+  replicas: 2
+  revisionHistoryLimit: 3
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: bestregards
+      app.kubernetes.io/component: app
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: bestregards
+        app.kubernetes.io/component: app
+    spec:
+      serviceAccountName: bestregards
+      automountServiceAccountToken: false
+      enableServiceLinks: false
+      # The service stops accepting requests and then waits up to 30 s for those in flight (an AI call
+      # lasts up to 25 s) before it exits; the grace period must cover that plus the preStop pause.
+      terminationGracePeriodSeconds: 45
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532 # the "nonroot" user of the distroless base image
+        runAsGroup: 65532
+        seccompProfile:
+          type: RuntimeDefault
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              app.kubernetes.io/name: bestregards
+              app.kubernetes.io/component: app
+      containers:
+        - name: bestregards
+          # The tag or digest is set by the overlay (kustomize "images"). Deploy by digest.
+          image: ghcr.io/dyudin0821/bestregards
+          imagePullPolicy: IfNotPresent
+          envFrom:
+            - configMapRef:
+                name: bestregards
+            - secretRef:
+                name: bestregards-secrets
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: bestregards-db-app # created by CloudNativePG for the owner of the database
+                  key: uri
+          ports:
+            - name: http
+              containerPort: 8080
+            - name: metrics
+              containerPort: 9090
+          # Migrations run at start and can take a while on the first deploy: a generous startup window,
+          # then the liveness probe takes over.
+          startupProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 2
+            failureThreshold: 30
+          # Liveness must not depend on the database, or a database outage would restart every pod.
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /readyz
+              port: http
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 2
+          lifecycle:
+            preStop:
+              # Lets the endpoint removal reach the Gateway before the service stops listening.
+              sleep:
+                seconds: 5
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              memory: 256Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: [ALL]

@@ -1,0 +1,69 @@
+# One-off task, kept as a suspended CronJob so that it follows the image of every deploy and still is
+# only ever run by hand. Run it once after the first deploy and after any change of PUBLIC_URL or
+# WEBHOOK_SECRET; it is safe to repeat:
+#
+#   kubectl -n bestregards create job --from=cronjob/bestregards-setup-webhook setup-webhook-$(date +%s)
+#   kubectl -n bestregards logs job/<the job name>
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: bestregards-setup-webhook
+  labels:
+    app.kubernetes.io/name: bestregards
+    app.kubernetes.io/component: setup-webhook
+spec:
+  schedule: "0 0 1 1 *" # never matters: the job is suspended
+  suspend: true
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 2
+  failedJobsHistoryLimit: 2
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      activeDeadlineSeconds: 120
+      ttlSecondsAfterFinished: 86400
+      template:
+        metadata:
+          labels:
+            app.kubernetes.io/name: bestregards
+            app.kubernetes.io/component: setup-webhook
+        spec:
+          serviceAccountName: bestregards
+          automountServiceAccountToken: false
+          enableServiceLinks: false
+          restartPolicy: Never
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 65532
+            runAsGroup: 65532
+            seccompProfile:
+              type: RuntimeDefault
+          containers:
+            - name: setup-webhook
+              image: ghcr.io/dyudin0821/bestregards
+              imagePullPolicy: IfNotPresent
+              args: ["setup-webhook"]
+              # It loads the whole configuration, which is validated as a whole, so it needs all of it.
+              # It never opens the database, but the configuration requires the address.
+              envFrom:
+                - configMapRef:
+                    name: bestregards
+                - secretRef:
+                    name: bestregards-secrets
+              env:
+                - name: DATABASE_URL
+                  valueFrom:
+                    secretKeyRef:
+                      name: bestregards-db-app
+                      key: uri
+              resources:
+                requests:
+                  cpu: 20m
+                  memory: 32Mi
+                limits:
+                  memory: 128Mi
+              securityContext:
+                allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
+                capabilities:
+                  drop: [ALL]

@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="ru" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>bestregards — переводчик с корпоративного языка и обратно</title>
+<meta name="description" content="Вставьте мысль как есть и скопируйте в рабочий чат так, как принято. Переводчик с корпоративного языка и обратно — на сайте и в Telegram.">
+</head>
+<body>
+<svg class="sprite" width="0" height="0" aria-hidden="true">
+ <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="square"/></symbol>
+ <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"/><path d="M16 8V4H4v12h4" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+</svg>
+
+<header>
+ <div class="wrap">
+  <a class="brand" href="#"><b>b</b>bestregards</a>
+  <nav aria-label="Разделы"><a href="#how">Как это работает</a><a href="#modes">Режимы</a><a href="#limits">Лимиты</a><a href="#faq">Вопросы</a></nav>
+  <div class="head-actions">
+   <button class="btn" id="theme" type="button" aria-pressed="false">Тёмная тема</button>
+   <a class="btn tg-link" href="https://t.me/bestregardsbot?start=landing">Открыть в Telegram</a>
+   <a class="btn btn-primary" href="/app">Попробовать</a>
+  </div>
+ </div>
+</header>
+
+<main>
+<section class="hero">
+ <div class="wrap">
+  <span class="tag tag-accent">Переводчик с корпоративного языка и обратно</span>
+  <h1>Скажи <em>как есть.</em> Отправь как надо.</h1>
+  <p class="lead">Вставьте мысль, выберите режим и уровень, скопируйте результат в рабочий чат. Или переведите чужое письмо на человеческий и узнайте, что имелось в виду.</p>
+  <div class="cta-row">
+   <a class="btn btn-primary" href="/app">Попробовать <svg width="20" height="20"><use href="#i-arrow"/></svg></a>
+   <a class="btn" href="https://t.me/bestregardsbot?start=landing_hero">Открыть в Telegram</a>
+   <div class="qr"><div class="code" role="img" aria-label="QR-код со ссылкой на бота (макет)"></div><span>Удобнее с телефона?<br>Наведите камеру.</span></div>
+  </div>
+
+  <div class="demo" aria-labelledby="demo-title">
+   <p id="demo-title" class="mono muted">Попробуйте без входа</p>
+   <div class="seg demo-tabs" role="group" aria-label="Режим примера">
+    <button type="button" aria-pressed="true" data-i="0">С HR</button>
+    <button type="button" aria-pressed="false" data-i="1">С коллегами</button>
+    <button type="button" aria-pressed="false" data-i="2">С начальством</button>
+    <button type="button" aria-pressed="false" data-i="3">На человеческий</button>
+   </div>
+   <div class="demo-grid">
+    <div class="raw"><span class="tag" id="from-tag">Как есть</span><p id="raw">В идеале — богатым, на берегу океана, где никто не спрашивает, кем я себя вижу через пять лет.</p></div>
+    <div class="memo" aria-live="polite">
+     <div class="memo-head"><span class="tag tag-accent" id="to-tag">Как отправить</span><span class="mono muted">Корпоративный сотрудник</span></div>
+     <p class="memo-body" id="out">Я стремлюсь к профессиональному и финансовому росту, расширению зоны ответственности и участию в стратегически значимых проектах.</p>
+     <div class="memo-foot"><button class="btn" type="button" id="copy"><svg width="20" height="20"><use href="#i-copy"/></svg>Скопировать</button></div>
+    </div>
+   </div>
+   <p class="demo-note"><span class="tag">Готовый пример · без AI</span><span class="muted">Свой текст переводит AI: 3 раза в день на сайте, 5 — в Telegram.</span></p>
+  </div>
+ </div>
+</section>
+
+<section id="how">
+ <div class="wrap">
+  <h2>Три действия. Ноль эмоций в чате.</h2>
+  <div class="steps">
+   <div class="step"><div class="num">01</div><h3>Вставьте как есть</h3><p class="muted">Что на самом деле думаете или что вам написали.</p></div>
+   <div class="step"><div class="num">02</div><h3>Выберите режим и уровень</h3><p class="muted">HR, коллеги, начальство — и насколько корпоративно.</p></div>
+   <div class="step"><div class="num">03</div><h3>Скопируйте и отправьте</h3><p class="muted">Готовый текст копируется одним нажатием.</p></div>
+  </div>
+ </div>
+</section>
+
+<section id="modes">
+ <div class="wrap">
+  <h2>Четыре режима</h2>
+  <div class="modes">
+   <div class="mode"><span class="mono">01</span><div><h3>С HR</h3><p class="muted">Собеседования и офферы</p></div></div>
+   <div class="mode"><span class="mono">02</span><div><h3>С коллегами</h3><p class="muted">Чаты, правки и созвоны</p></div></div>
+   <div class="mode"><span class="mono">03</span><div><h3>С начальством</h3><p class="muted">Дедлайны и личные границы</p></div></div>
+   <div class="mode alt"><span class="mono">04</span><div><h3>На человеческий</h3><p>Что они имели в виду</p></div></div>
+  </div>
+  <div class="level levels" role="group" aria-label="Уровни (пример)">
+   <button type="button" aria-pressed="false"><span class="bars"><i class="on"></i><i></i><i></i></span>Почти человек</button>
+   <button type="button" aria-pressed="true"><span class="bars"><i class="on"></i><i class="on"></i><i></i></span>Корпоративный сотрудник</button>
+   <button type="button" aria-pressed="false"><span class="bars"><i class="on"></i><i class="on"></i><i class="on"></i></span>HR-директор 3000</button>
+  </div>
+ </div>
+</section>
+
+<section id="limits">
+ <div class="wrap">
+  <h2>Сколько это стоит? Нисколько.</h2>
+  <div class="prices">
+   <div class="price"><span class="tag">На сайте</span><strong>3</strong><p>AI-перевода в сутки без регистрации. Лимит обновляется каждый день.</p></div>
+   <div class="price hot"><span class="tag tag-ink">В Telegram</span><strong>5</strong><p>AI-переводов в сутки после входа через Telegram.</p></div>
+   <div class="price"><span class="tag">Готовые примеры</span><strong>∞</strong><p>Без ограничений, без входа и без AI.</p></div>
+  </div>
+ </div>
+</section>
+
+<section id="faq">
+ <div class="wrap">
+  <h2 class="faq-title">Вопросы</h2>
+  <details><summary>Вы читаете мои тексты?</summary><p>Нет. Текст уходит на перевод и не сохраняется на нашей стороне. История хранится только у вас на устройстве. В базе — только служебный идентификатор и счётчик переводов.</p></details>
+  <details><summary>Это серьёзно?</summary><p>Это сатира. Обратный перевод — шуточная интерпретация, а не чтение мыслей. Проверяйте текст перед отправкой.</p></details>
+  <details><summary>Сколько переводов бесплатно?</summary><p>На сайте — 3 AI-перевода в день, в Telegram — 5. Готовые примеры не ограничены и не расходуют лимит.</p></details>
+  <details><summary>Что делать, если переводы на сегодня закончились?</summary><p>Подождите до следующих суток: лимит обновится сам. Готовые примеры остаются доступными, а в Telegram переводов даётся больше.</p></details>
+ </div>
+</section>
+
+<section class="final">
+ <div class="wrap">
+  <h2>Лучше один раз перевести.</h2>
+  <div class="cta-row">
+   <a class="btn btn-primary" href="/app">Попробовать <svg width="20" height="20"><use href="#i-arrow"/></svg></a>
+   <a class="btn" href="https://t.me/bestregardsbot?start=landing_footer">Открыть в Telegram</a>
+  </div>
+ </div>
+</section>
+</main>
+
+<footer>
+ <div class="wrap">
+  <span>© bestregards · вдохновлено <a href="https://github.com/DIESPECTR/s-uvazheniem" rel="noopener">«С УВАЖЕНИЕМ.»</a></span>
+  <span><a href="/privacy">Политика конфиденциальности</a><a href="#">Условия</a><a href="#">Поддержка</a></span>
+ </div>
+</footer>
+
+<script type="module" src="/src/landing.js"></script>
+</body>
+</html>

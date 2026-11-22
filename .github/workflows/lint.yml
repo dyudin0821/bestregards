@@ -1,0 +1,79 @@
+name: Lint
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: lint-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  # renovate: datasource=github-releases depName=golangci/golangci-lint
+  GOLANGCI_LINT_VERSION: v2.15.0
+  # renovate: datasource=github-releases depName=sqlc-dev/sqlc
+  SQLC_VERSION: v1.31.1
+  # renovate: datasource=github-releases depName=yannh/kubeconform
+  KUBECONFORM_VERSION: v0.8.0
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+
+      - run: go vet ./...
+
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v9
+        with:
+          version: ${{ env.GOLANGCI_LINT_VERSION }}
+
+  generated:
+    name: Generated code
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+
+      # A stale internal/store/db fails the build.
+      - name: sqlc generate leaves nothing to commit
+        run: |
+          go run "github.com/sqlc-dev/sqlc/cmd/sqlc@${SQLC_VERSION}" generate
+          git diff --exit-code -- internal/store/db
+
+  manifests:
+    name: Kubernetes manifests
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: go.mod
+
+      # Renders what would be applied and checks it against the schemas of Kubernetes and, for the
+      # Prometheus Operator objects, the CRD catalog. The overlay is an example: it must always render.
+      - name: Render and validate
+        run: |
+          kubectl kustomize deploy/k8s/overlays/production > /tmp/app.yaml
+          kubectl kustomize deploy/k8s/monitoring > /tmp/monitoring.yaml
+          go run "github.com/yannh/kubeconform/cmd/kubeconform@${KUBECONFORM_VERSION}" -strict -summary -kubernetes-version 1.31.0 \
+            -schema-location default \
+            -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/main/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json' \
+            /tmp/app.yaml /tmp/monitoring.yaml

@@ -1,0 +1,73 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    "docker:pinDigests",
+    "helpers:pinGitHubActionDigestsToSemver"
+  ],
+  "timezone": "Europe/Moscow",
+  "schedule": ["before 6am on monday"],
+  "labels": ["dependencies"],
+  "prConcurrentLimit": 5,
+  "postUpdateOptions": ["gomodTidy"],
+  "packageRules": [
+    {
+      "description": "Minor and patch updates of Go modules arrive as one pull request; majors get their own.",
+      "matchManagers": ["gomod"],
+      "matchUpdateTypes": ["minor", "patch", "digest"],
+      "groupName": "go modules",
+      "labels": ["dependencies", "go"]
+    },
+    {
+      "description": "Same for the frontend. The dev tooling and the shipped bundle share a lockfile, so they move together.",
+      "matchManagers": ["npm"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "web dependencies",
+      "labels": ["dependencies", "web"]
+    },
+    {
+      "description": "The toolchain must stay one version across go.mod, the Dockerfile and CI.",
+      "matchPackageNames": ["go", "golang"],
+      "groupName": "go toolchain",
+      "labels": ["dependencies", "go"]
+    },
+    {
+      "description": "Node is pinned in the Dockerfile and in test.yml; a major bump is a decision, so it is one reviewed pull request.",
+      "matchPackageNames": ["node"],
+      "groupName": "node",
+      "labels": ["dependencies", "web"]
+    },
+    {
+      "description": "Base image digests of the Dockerfile.",
+      "matchManagers": ["dockerfile"],
+      "matchUpdateTypes": ["digest", "pin", "pinDigest"],
+      "groupName": "base image digests",
+      "labels": ["dependencies", "docker"]
+    },
+    {
+      "description": "Workflow actions and the tools the workflows download.",
+      "matchManagers": ["github-actions", "custom.regex"],
+      "matchUpdateTypes": ["minor", "patch", "digest", "pin", "pinDigest"],
+      "groupName": "ci",
+      "labels": ["dependencies", "ci"]
+    }
+  ],
+  "customManagers": [
+    {
+      "description": "Tool versions kept in workflow env variables, annotated with '# renovate: datasource=... depName=...'.",
+      "customType": "regex",
+      "managerFilePatterns": ["/^\\.github/workflows/.+\\.ya?ml$/"],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>[a-z-]+) depName=(?<depName>\\S+)\\n\\s+[A-Z_]+_VERSION: (?<currentValue>\\S+)"
+      ]
+    },
+    {
+      "description": "The sqlc command in the README is pinned to the same release the lint workflow uses.",
+      "customType": "regex",
+      "managerFilePatterns": ["/^README\\.md$/"],
+      "matchStrings": ["sqlc/cmd/sqlc@(?<currentValue>v[0-9.]+)"],
+      "depNameTemplate": "sqlc-dev/sqlc",
+      "datasourceTemplate": "github-releases"
+    }
+  ]
+}

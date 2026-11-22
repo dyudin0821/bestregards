@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="ru" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>bestregards — переводчик</title>
+<link rel="stylesheet" href="tokens.css">
+<style>
+header{border-bottom:var(--border);background:var(--paper)}
+header .wrap{display:flex;align-items:center;justify-content:space-between;min-height:64px;gap:var(--s4)}
+.top-right{display:flex;align-items:center;gap:var(--s4)}
+.top-right .btn{min-height:40px;padding:0 var(--s4);font-size:14px}
+.layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:var(--s6);padding:var(--s6) 0 var(--s7)}
+.panel{display:flex;flex-direction:column;gap:var(--s5)}
+.panel h2{font-size:28px}
+.label{display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--s2)}
+.stub{border:2px dashed var(--soft-line);padding:var(--s6) var(--s5);color:var(--muted);min-height:320px;display:grid;place-items:center;text-align:center}
+.state{display:none}
+[data-state=pair] .st-pair,[data-state=ai] .st-ai,[data-state=loading] .st-loading,[data-state=empty] .st-empty,[data-state=error] .st-error{display:block}
+.skeleton{height:14px;background:var(--soft-line);margin:var(--s3) 0;animation:pulse 1.1s steps(2) infinite}
+.skeleton:nth-child(2){width:80%}.skeleton:nth-child(3){width:55%}
+@keyframes pulse{50%{opacity:.4}}
+.status-line{font-family:var(--mono);font-size:13px;margin-top:var(--s3)}
+.quota-out{border:var(--border);background:var(--accent);color:var(--on-accent);padding:var(--s5);box-shadow:var(--shadow)}
+.quota-out h3{font-size:26px;margin-bottom:var(--s2)}
+.error-box{border:var(--border);border-color:var(--danger);padding:var(--s4);color:var(--danger);background:var(--surface)}
+.error-box strong{color:var(--ink)}
+.history{border-top:var(--border);padding:var(--s6) 0 var(--s8)}
+.history ul{list-style:none;margin:var(--s4) 0 0;padding:0;border:var(--border);background:var(--surface)}
+.history li{display:grid;grid-template-columns:170px 1fr 1fr auto;gap:var(--s4);align-items:center;padding:var(--s3) var(--s4);border-bottom:1px solid var(--soft-line)}
+.history li:last-child{border-bottom:0}
+.history li p{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.history .tag{justify-self:start;white-space:nowrap}
+.history .btn{min-height:36px;padding:0 var(--s3);font-size:13px}
+.states{position:fixed;right:var(--s4);bottom:var(--s4);background:var(--ink);color:var(--paper);padding:var(--s3);display:flex;gap:var(--s2);flex-wrap:wrap;max-width:360px;z-index:5}
+.states button{min-height:32px;padding:0 var(--s2);border:1px solid currentColor;background:none;color:inherit;font:500 12px var(--mono);cursor:pointer}
+.states button[aria-pressed=true]{background:var(--accent);color:#111;border-color:var(--accent)}
+@media (max-width:640px){
+ .top-right .btn{display:none}
+ .states{position:static;max-width:none;margin:var(--s4)}
+ .history .label{flex-wrap:wrap;gap:var(--s2)}
+}
+@media (max-width:900px){
+ .layout{grid-template-columns:1fr}
+ .history li{grid-template-columns:1fr auto}.history li .mono,.history li p+p{display:none}
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+ <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"/><path d="M16 8V4H4v12h4" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+ <symbol id="i-send" viewBox="0 0 24 24"><path d="M3 11l18-7-7 18-3-8-8-3z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="miter"/></symbol>
+ <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.5-5.8M20 4v5h-5" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+</svg>
+
+<header>
+ <div class="wrap">
+  <a class="brand" href="#"><b>b</b>bestregards</a>
+  <div class="top-right">
+   <div class="quota" title="Бесплатные переводы на сегодня">
+    <div class="pips" aria-hidden="true"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></div>
+    <span class="mono">Сегодня: 3 из 5</span>
+   </div>
+   <button class="btn" type="button">История</button>
+   <button class="btn" id="theme" type="button" aria-pressed="false">Тёмная</button>
+  </div>
+ </div>
+</header>
+
+<main class="wrap" data-state="pair" id="app">
+ <div class="layout">
+  <section class="panel" aria-labelledby="in-title">
+   <h2 id="in-title">Оригинал</h2>
+   <div class="seg" role="group" aria-label="Режим">
+    <button type="button" aria-pressed="false">С HR</button>
+    <button type="button" aria-pressed="true">С коллегами</button>
+    <button type="button" aria-pressed="false">С начальством</button>
+    <button type="button" aria-pressed="false">На человеческий</button>
+   </div>
+   <div class="field">
+    <label class="mono" for="src">Как есть</label>
+    <textarea id="src" placeholder="Напишите, что думаете на самом деле…">Ты опять не сделал, что обещал.</textarea>
+    <div class="hint mono muted"><span>Готовый пример · без AI</span><span>31 / 6000</span></div>
+   </div>
+   <div>
+    <div class="label"><span class="mono">Уровень</span></div>
+    <div class="level" role="group" aria-label="Уровень">
+     <button type="button" aria-pressed="false"><span class="bars"><i class="on"></i><i></i><i></i></span>Почти человек</button>
+     <button type="button" aria-pressed="true"><span class="bars"><i class="on"></i><i class="on"></i><i></i></span>Корпоративный сотрудник</button>
+     <button type="button" aria-pressed="false"><span class="bars"><i class="on"></i><i class="on"></i><i class="on"></i></span>HR-директор 3000</button>
+    </div>
+    <p class="mono muted" style="margin-top:var(--s2)">Для готовых примеров уровень не меняется.</p>
+   </div>
+   <div style="display:flex;gap:var(--s3);flex-wrap:wrap">
+    <button class="btn btn-primary" type="button">Перевести · 1 из 3</button>
+    <button class="btn" type="button">Случайный пример</button>
+   </div>
+  </section>
+
+  <section class="panel" aria-labelledby="out-title" aria-live="polite">
+   <h2 id="out-title">С уважением</h2>
+
+   <div class="state st-empty"><div class="stub"><p>Здесь появится готовый текст.<br>Вставьте мысль слева или возьмите случайный пример.</p></div></div>
+
+   <div class="state st-loading">
+    <div class="memo"><div class="memo-head"><span class="tag">Перевожу</span></div>
+     <div class="memo-body"><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div><p class="status-line">Удаляем искренность…</p></div></div>
+   </div>
+
+   <div class="state st-pair">
+    <div class="memo">
+     <div class="memo-head"><span class="tag">Готовый пример · без AI</span><span class="mono muted">Корпоративный сотрудник</span></div>
+     <p class="memo-body">Хочу синхронизироваться по статусу нашей договорённости и понять, какие есть блокеры.</p>
+     <div class="memo-foot">
+      <button class="btn btn-primary" type="button"><svg width="20" height="20"><use href="#i-copy"/></svg>Скопировать</button>
+      <button class="btn" type="button"><svg width="20" height="20"><use href="#i-send"/></svg>В чат</button>
+     </div>
+    </div>
+    <p class="muted" style="margin-top:var(--s3)">Это заготовленный пример. Смена уровня и новый вариант требуют AI-перевода.</p>
+   </div>
+
+   <div class="state st-ai">
+    <div class="memo">
+     <div class="memo-head"><span class="tag tag-accent">AI-перевод</span><span class="mono muted">Корпоративный сотрудник</span></div>
+     <p class="memo-body">Давайте уточним статус задачи: нам важно синхронизироваться по срокам и вовремя увидеть возможные риски.</p>
+     <div class="memo-foot">
+      <button class="btn btn-primary" type="button"><svg width="20" height="20"><use href="#i-copy"/></svg>Скопировать</button>
+      <button class="btn" type="button"><svg width="20" height="20"><use href="#i-send"/></svg>В чат</button>
+      <button class="btn" type="button"><svg width="20" height="20"><use href="#i-refresh"/></svg>Другой вариант · 1</button>
+     </div>
+    </div>
+    <p class="muted" style="margin-top:var(--s3)">Проверьте текст перед отправкой: это сатирический перевод, а не готовое письмо.</p>
+   </div>
+
+   <div class="state st-error">
+    <div class="error-box" role="alert"><strong>Не получилось перевести.</strong><p>Провайдер не ответил. Квота возвращена, текст остался в поле слева.</p>
+     <button class="btn" type="button" style="margin-top:var(--s3)">Повторить</button></div>
+   </div>
+
+   <div class="quota-out" id="quota-out" hidden>
+    <h3>На сегодня синергия закончилась</h3>
+    <p>Бесплатные переводы обновятся в 00:00. Готовые примеры доступны всегда.</p>
+   </div>
+  </section>
+ </div>
+
+ <section class="history" aria-labelledby="h-title">
+  <div class="label"><h2 id="h-title" style="font-size:24px">История <span class="mono muted">хранится только на этом устройстве</span></h2><button class="link" type="button">Очистить</button></div>
+  <ul>
+   <li><span class="tag">С HR</span><p>Потому что у вас написано «удалёнка» и «зарплата».</p><p class="muted">Меня привлекает гибкий формат работы…</p><button class="btn" type="button">Открыть</button></li>
+   <li><span class="tag">С начальством</span><p>Это нельзя сделать за два дня.</p><p class="muted">Предлагаю пересогласовать срок и приоритеты.</p><button class="btn" type="button">Открыть</button></li>
+   <li><span class="tag">На человеческий</span><p>Давайте вынесем это в оффлайн.</p><p class="muted">Не хочу обсуждать это при всех.</p><button class="btn" type="button">Открыть</button></li>
+  </ul>
+ </section>
+</main>
+
+<div class="states" role="group" aria-label="Макет: состояния экрана">
+ <button type="button" data-s="pair" aria-pressed="true">Готовый пример</button>
+ <button type="button" data-s="ai" aria-pressed="false">AI-перевод</button>
+ <button type="button" data-s="loading" aria-pressed="false">Загрузка</button>
+ <button type="button" data-s="empty" aria-pressed="false">Пусто</button>
+ <button type="button" data-s="error" aria-pressed="false">Ошибка</button>
+ <button type="button" data-s="quota-out" aria-pressed="false">Квота кончилась</button>
+</div>
+
+<script>
+const app=document.getElementById('app'),pw=document.getElementById('quota-out');
+document.querySelectorAll('.states button').forEach(b=>b.addEventListener('click',()=>{
+ document.querySelectorAll('.states button').forEach(x=>x.setAttribute('aria-pressed',x===b));
+ const s=b.dataset.s;pw.hidden=s!=='quota-out';app.dataset.state=s==='quota-out'?'empty':s;
+}));
+const root=document.documentElement,tb=document.getElementById('theme');
+if(matchMedia('(prefers-color-scheme: dark)').matches){root.dataset.theme='dark';tb.setAttribute('aria-pressed',true);tb.textContent='Светлая'}
+tb.addEventListener('click',()=>{const d=root.dataset.theme!=='dark';root.dataset.theme=d?'dark':'light';tb.setAttribute('aria-pressed',d);tb.textContent=d?'Светлая':'Тёмная'});
+</script>
+</body>
+</html>

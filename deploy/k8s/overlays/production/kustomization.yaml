@@ -1,0 +1,45 @@
+# Copy this directory for each environment and edit it; the base is not meant to be edited.
+# Render: kubectl kustomize deploy/k8s/overlays/production
+# Apply:  kubectl apply -k deploy/k8s/overlays/production
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - ../../base
+  # Uncomment when the Prometheus Operator is installed:
+  # - ../../monitoring
+
+images:
+  - name: ghcr.io/dyudin0821/bestregards
+    # Deploy by digest: the "Image" summary of the image workflow prints it. Verify it first:
+    #   gh attestation verify oci://ghcr.io/<owner>/bestregards@sha256:<digest> --repo <owner>/bestregards
+    # Until the first image exists, "main" stands in; replace it with `digest: sha256:...`.
+    newTag: main
+
+patches:
+  - target: {kind: ConfigMap, name: bestregards}
+    patch: |-
+      - op: replace
+        path: /data/PUBLIC_URL
+        value: https://bestregards.example
+  - target: {kind: Gateway, name: bestregards}
+    patch: |-
+      - op: replace
+        path: /spec/gatewayClassName
+        value: envoy-gateway
+      - op: replace
+        path: /spec/listeners/0/hostname
+        value: bestregards.example
+      - op: replace
+        path: /spec/listeners/1/hostname
+        value: bestregards.example
+  - target: {kind: HTTPRoute}
+    patch: |-
+      - op: replace
+        path: /spec/hostnames/0
+        value: bestregards.example
+  # A private GHCR package needs a pull secret (kubectl create secret docker-registry ghcr-pull ...):
+  # - target: {kind: ServiceAccount, name: bestregards}
+  #   patch: |-
+  #     - op: add
+  #       path: /imagePullSecrets
+  #       value: [{name: ghcr-pull}]

@@ -1,68 +1,116 @@
-# С УВАЖЕНИЕМ.
+# bestregards
 
-Russian satirical corporate translator. React 19 + Vite + Express. No account, payment, analytics, or message database.
+**Переводчик между человеческой речью и корпоративным языком, и обратно.**
 
-## Run locally
+«Давай созвонимся» превращается в «предлагаю синкнуться и выровнять ожидания», а «синергия на уровне стейкхолдеров» обратно в «вы все друг другу что-то должны». Проект сатирический: цель в шуме и «вау», а не в выручке. Платежей нет.
 
-Requires Node.js 22+ and npm.
+Работает без регистрации на сайте (анонимный гость после проверки Cloudflare Turnstile) и в Telegram как Mini App. Лендинг, сайт и бот обслуживает один сервис.
 
-```sh
-npm install
-npm run dev
-```
+Проект вдохновлён [«С УВАЖЕНИЕМ.»](https://github.com/DIESPECTR/s-uvazheniem) — сатирическим корпоративным переводчиком на React и Express. bestregards переписан на Go с PostgreSQL и развивается как отдельный проект.
 
-Open http://localhost:3000. All 40 predefined examples work without an API key. Demo results are explicitly labelled. Custom input, tone changes, alternatives and arbitrary reverse translation require AI; the app never pretends a preset is AI-generated.
+## Возможности
 
-## Enable AI
+- Четыре режима: с HR, с коллегами, с начальством и обратный перевод «на человеческий»; три уровня «корпоративности».
+- 40 готовых пар: переводятся мгновенно, бесплатно и без квоты.
+- AI-перевод любого своего текста и кнопка «Другой вариант».
+- Гость на сайте: 3 AI-перевода в сутки; пользователь Telegram: 5.
+- Суточный потолок расходов на AI, аварийные выключатели и панель администратора в боте (`/admin`).
+- Псевдонимизированные продуктовые метрики (например, доля скопированных переводов) без текстов и персональных данных в открытом виде.
 
-Create `.env` using `.env.example` and set the server-only `AI_API_KEY`. Restart the server. Optional `AI_BASE_URL` points to an OpenAI-compatible `/v1` API; `AI_MODEL` defaults to `gpt-6-luna`; set `AI_MODEL=gpt-4o-mini` to use the previous model. Luna requests use `reasoning_effort=none` and `max_completion_tokens=1800`. Never use a `VITE_` prefix for secrets. TC7 and TC12 passed with a mock provider: both targets request gpt-6-luna by default and use distinct system prompts. This does not verify live model access.
+## Как устроено
 
-## Railway — handoff to Yan
+Один бинарник на Go: бэкенд (`net/http`), вшитый в него фронтенд и бот. Состояние в PostgreSQL.
 
-1. Railway → New Project → Deploy from GitHub repo → `DIESPECTR/s-uvazheniem`, branch `main`. Leave the root directory at `/`. The root Dockerfile handles Node 22, installation, Vite build and production startup; no custom build/start commands are needed. No database or volume is required.
-2. Service → **Variables**: add `AI_API_KEY` (the OpenAI secret key) and `AI_MODEL=gpt-6-luna` for both translators (verify provider access on staging first). Optional `AI_BASE_URL=https://api.openai.com/v1` is already the server default. Do not use `OPENAI_API_KEY` or any `VITE_` key: this application reads `AI_API_KEY`.
-3. Deploy, then Settings → Networking → **Generate Domain** for the HTTPS URL. Railway supplies `PORT`; do not hardcode it. `NODE_ENV=production` is already set in the image.
+| | |
+|---|---|
+| Бэкенд | Go 1.27, `net/http`, `pgx`, `goose` (миграции), `sqlc` (запросы), `slog` |
+| Фронтенд | React 19, Vite 6; шрифты Golos Text и IBM Plex Mono вшиты |
+| База | PostgreSQL 17 |
+| AI | любой OpenAI-совместимый API; по умолчанию OpenRouter и `deepseek/deepseek-v4-flash` |
+| Доставка | OCI-образ в GHCR с аттестацией провенанса; манифесты Kubernetes (Kustomize, Gateway API, CloudNativePG) |
+| Наблюдаемость | JSON-логи, метрики Prometheus, трассировка OpenTelemetry |
 
-For the standard direct Railway public endpoint behind one trusted reverse proxy, set `TRUST_PROXY=1` so the existing IP limiter distinguishes users. Recheck the proxy chain before adding another proxy/CDN; do not enable arbitrary proxy trust. Start with one replica (the rate limiter is in memory).
+Подробнее: [docs/architecture.md](./docs/architecture.md).
 
-Optional Railway healthcheck path: `/api/status`. It returns HTTP 200 without an API key; `ai:true` only means a key is configured, not that OpenAI has accepted it. After deployment, translate a custom phrase not in the demo library and confirm the result is AI-generated. The Docker image, Railway deployment and live OpenAI access have not been exercised in this environment (Docker is unavailable).
+## Быстрый старт
 
-Both modes use the same `AI_MODEL`, with different server-side system prompts. The sample and code default to `gpt-6-luna`. An existing Railway override takes precedence; a successful mock request does not establish live model access.
-
-## Production
-
-```sh
-npm run build
-npm start
-```
-
-Deploy the repository to a Node-capable host with build command `npm ci && npm run build` and start command `npm start`. Configure `PORT` and `AI_API_KEY` in the host's secret/environment settings, and enable HTTPS. The Express server serves both API and `dist`. Static-only hosting does not provide the translation API.
-
-Use `TRUST_PROXY=1` only behind exactly one trusted reverse proxy. The rate limit is 20 requests/minute per IP, in memory per process. Multiple replicas need a shared rate limiter. Before broad public promotion, set provider spending limits; IP throttling alone is not a global cost cap. No public deployment has been performed.
-
-## GitHub and deployment handoff
-
-Source code is published at https://github.com/DIESPECTR/s-uvazheniem (public, branch `main`). Public access and the 19-file publication manifest were verified without authentication.
-
-**cxrtisxl** has been invited with **write** access; the invitation is pending acceptance. Hosting access is configured separately; GitHub write access alone does not grant access to a hosting account. The application itself has not been deployed to a public hosting service.
-
-For deployment, cxrtisxl should connect the repository to a Node.js 22+ service, configure the build/start commands above, and add `AI_API_KEY` directly in the host's secret settings. Do not share keys through chat, source files, or commits. Set `AI_MODEL` explicitly after verifying provider access and request compatibility; the GPT-6 Luna request wiring is implemented, but its new contract test and live-provider verification are still pending.
-
-Never publish `.env`, `.temp`, `.quadcodeai`, `.mcp.json`, credentials, or local logs. If a GitHub token was exposed in chat, revoke it at https://github.com/settings/tokens and configure replacement authentication through a secure local login or secret environment variable. Never put a token in the git remote URL.
-
-## Privacy and sharing
-
-History: last 30 translations in browser localStorage, removable in the History dialog. AI requests send text to the server and configured AI provider. Do not submit secrets or personal data. No application request-body logging is added. Google Fonts is an external font request.
-
-The share card is an HTML preview: screenshot it for Stories, print/save as PDF, copy its text, or use native Web Share where supported. There is no automatic PNG export or public storage of cards. Reverse translations carry a satire disclaimer.
-
-## Checks
+Нужны Go 1.27+, Node.js 22+ и Docker.
 
 ```sh
-npm test
-npm run build
+docker compose up -d db
+cp .env.example .env          # заполните POSTGRES_PASSWORD (и тот же пароль в DATABASE_URL), BOT_TOKEN, SESSION_SECRET, EVENTS_PEPPER
+npm --prefix web install
+npm --prefix web run build    # собирает фронтенд (web/src) в web/dist
+set -a; . ./.env; set +a
+GUESTS_WITHOUT_CHALLENGE=1 go run ./cmd/bestregards
 ```
 
-Five focused tests cover all 40 demo pairs, validation, mocked AI success/failure/timeout and safe local history. Browser checks cover 1440px desktop and 390px mobile, dark theme, all four modes, history restore, card preview, HR offer and stale-request protection. HTTP checks cover 200/400/403/429 responses. Saved logs: `.temp/tests.log`, `.temp/build.log`, `.temp/http-checks.log`.
+Откройте http://localhost:8080/ (лендинг) и http://localhost:8080/app (приложение). Миграции применяются при старте.
 
-Requirements: `meta/docs/respect/app_req.md`. Plan: `meta/plans/implementation.md`. Component style sample: `style-guide.html` in development.
+> `GUESTS_WITHOUT_CHALLENGE=1` пускает гостей без проверки Turnstile и нужна **только для локальной разработки**. В продакшене скрипты смогли бы плодить гостей без ограничений.
+
+Без `AI_API_KEY` работают только готовые пары. Для AI-переводов задайте ключ, `AI_MODEL` и цены модели (`AI_PRICE_*`): [docs/configuration.md](./docs/configuration.md#ai-провайдер).
+
+**Фронтенд.** `npm --prefix web run dev` поднимает Vite (`http://localhost:5173/` приложение, `/landing.html` лендинг) и проксирует `/api` на `localhost:8080`.
+
+**Telegram.** Вход через Telegram работает только внутри Telegram: сервер проверяет подпись `initData` по `BOT_TOKEN`. Откройте HTTPS-адрес сервиса (например, через туннель `cloudflared`) как Mini App своего бота: в BotFather задайте URL `https://<хост>/app`. Для кнопки `/start` и панели `/admin` задайте `WEBHOOK_SECRET`, `PUBLIC_URL` (https) и `ADMIN_IDS`, запустите сервис и выполните `bestregards setup-webhook`.
+
+## Конфигурация
+
+Только переменные окружения; все они описаны в [.env.example](./.env.example) и в [docs/configuration.md](./docs/configuration.md). Сервис не запустится, пока не заданы:
+
+| Переменная | Назначение |
+|---|---|
+| `DATABASE_URL` | Строка подключения к PostgreSQL. |
+| `BOT_TOKEN` | Токен бота из BotFather. |
+| `SESSION_SECRET` | Подпись токенов сессии, не короче 32 символов. |
+| `EVENTS_PEPPER` | Ключ хэша пользователя в событиях, не короче 32 символов. |
+
+## Тесты
+
+```sh
+go test ./...                 # без базы часть тестов хранилища пропускается
+TEST_DATABASE_URL='postgres://bestregards:<POSTGRES_PASSWORD>@localhost:5432/bestregards?sslmode=disable' go test -p 1 ./...
+npm --prefix web test
+```
+
+Пакеты делят одну базу, поэтому с настоящей базой запускайте с `-p 1`. После изменения `internal/store/queries.sql` или файлов в `migrations/` перегенерируйте код (версия закреплена: команда выполняет код при запуске):
+
+```sh
+go run github.com/sqlc-dev/sqlc/cmd/sqlc@v1.31.1 generate
+```
+
+Сборка образа: `docker build -t bestregards .`.
+
+## Развёртывание
+
+Образ публикуется в GHCR; манифесты Kubernetes лежат в [deploy/k8s/](./deploy/k8s) (Kustomize): Deployment, Gateway API, кластер PostgreSQL на CloudNativePG, NetworkPolicy, CronJob'ы. Пошаговая инструкция, требования к кластеру и объяснение настроек: [docs/deployment.md](./docs/deployment.md).
+
+## Документация
+
+| | |
+|---|---|
+| [Конфигурация](./docs/configuration.md) | Все переменные окружения, AI-провайдер |
+| [HTTP API](./docs/api.md) | Маршруты и коды ошибок |
+| [Квоты и расходы](./docs/quotas-and-spending.md) | Как ограничены расходы на AI |
+| [Развёртывание](./docs/deployment.md) | Kubernetes, база, вход снаружи |
+| [Эксплуатация](./docs/operations.md) | Панель `/admin`, логи, метрики, алерты, трассировка |
+| [CI и релиз](./docs/ci.md) | Workflow'ы, образ и его проверка, Renovate |
+| [Безопасность и данные](./docs/security.md) | Модель угроз, что хранится, куки и хранилище браузера (страница `/privacy`) |
+| [Архитектура](./docs/architecture.md) | Слои и ADR |
+| [Метрики продукта](./docs/metrics.md) | Определения и SQL-запросы |
+| [Глоссарий](./CONTEXT.md), [дизайн](./docs/design) | Термины проекта и макеты |
+
+## Статус
+
+Проект в разработке, к публичному запуску не готов.
+
+- **Код и миграции `00001`–`00005` написаны ИИ-ассистентом и не проходили ревью человеком.** Перед продакшеном нужно проверить в первую очередь миграции, гостевой вход, лимиты и потолок расходов.
+- Живые запросы к настоящим AI-провайдеру, Cloudflare Turnstile и Telegram Bot API не проверялись: весь путь отработан на поддельных сервисах с теми же контрактами.
+- Манифесты Kubernetes проверены валидатором, но в кластере не запускались; workflow'ы GitHub Actions ни разу не выполнялись.
+- Не реализованы: бэкапы базы и автоматическое удаление данных по запросу пользователя. Страница `/privacy` есть, но юристом не проверялась.
+- Сознательно не делаем: вход на сайте через Login Widget, inline-режим бота и кнопку «В чат».
+
+## Безопасность
+
+Не публикуйте `.env`, токены и ключи. Модель угроз и остаточные риски: [docs/security.md](./docs/security.md).
