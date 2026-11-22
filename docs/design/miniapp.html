@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="ru" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>bestregards — Telegram Mini App (макет)</title>
+<link rel="stylesheet" href="tokens.css">
+<style>
+body{padding:var(--s6) var(--s5) var(--s8)}
+.board{display:flex;gap:var(--s6);flex-wrap:wrap;align-items:flex-start;justify-content:center}
+figure{margin:0;display:flex;flex-direction:column;gap:var(--s3)}
+figcaption{max-width:360px;font-size:14px;color:var(--muted)}
+figcaption b{color:var(--ink);display:block;font-size:16px}
+h1.page{font-size:32px;margin:0 auto var(--s6);max-width:1200px}
+.phone{position:relative;width:360px;height:740px;overflow:hidden;background:var(--paper);color:var(--ink);border:3px solid var(--ink);display:flex;flex-direction:column}
+.tg-bar{flex:none;height:48px;display:flex;align-items:center;justify-content:space-between;padding:0 var(--s4);border-bottom:var(--border);background:var(--surface);font-weight:700}
+.tg-bar span{font:500 13px var(--mono)}
+.scroll{flex:1;overflow:hidden;padding:var(--s4);display:flex;flex-direction:column;gap:var(--s4)}
+.main-btn{flex:none;min-height:56px;display:flex;align-items:center;justify-content:center;gap:var(--s2);background:var(--accent);color:var(--on-accent);border-top:2px solid #111;font:800 17px var(--font);padding-bottom:env(safe-area-inset-bottom)}
+.phone .seg{grid-template-columns:1fr 1fr}
+.phone .seg button{border-right:var(--border);border-bottom:var(--border)}
+.phone .seg button:nth-child(2n){border-right:0}
+.phone .seg button:nth-child(n+3){border-bottom:0}
+.phone .level{grid-template-columns:1fr;gap:var(--s2)}
+.phone .level button{flex-direction:row;align-items:center;justify-content:space-between;min-height:var(--tap)}
+.phone .field textarea{min-height:104px;font-size:17px}
+.phone .memo{box-shadow:none}
+.phone .memo-body{font-size:18px;padding:var(--s4)}
+.row{display:flex;justify-content:space-between;align-items:center;gap:var(--s2)}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:var(--surface);border-top:var(--border);padding:var(--s5) var(--s4) var(--s5);display:flex;flex-direction:column;gap:var(--s3);box-shadow:0 -4px 0 var(--accent)}
+.scrim{position:absolute;inset:0;background:rgba(0,0,0,.55)}
+.chat-bg{flex:1;padding:var(--s4);display:flex;flex-direction:column;gap:var(--s3);justify-content:flex-end}
+.bubble{max-width:86%;padding:var(--s3);border:var(--border);background:var(--surface)}
+.bubble.me{align-self:flex-end;background:var(--accent);color:var(--on-accent);border-color:#111}
+.bubble small{display:block;margin-top:6px;font:500 12px var(--mono);opacity:.75}
+.inline-list{flex:none;border-top:var(--border);background:var(--surface)}
+.inline-item{display:flex;gap:var(--s3);padding:var(--s3) var(--s4);border-bottom:1px solid var(--soft-line);min-height:64px;align-items:center}
+.inline-item .ic{flex:none;width:40px;height:40px;display:grid;place-items:center;background:var(--accent);color:var(--on-accent);border:2px solid #111;font-weight:900}
+.inline-item p{font-size:14px;line-height:1.3}
+.inline-item .t{font-weight:700;font-size:15px}
+.chat-input{flex:none;padding:var(--s3) var(--s4);border-top:var(--border);background:var(--surface);font:500 14px var(--mono)}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+ <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"/><path d="M16 8V4H4v12h4" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+</svg>
+
+<h1 class="page">Telegram Mini App · 360 × 740</h1>
+<div class="board">
+
+<figure>
+ <div class="phone" data-theme="light">
+  <div class="tg-bar"><span>Закрыть</span><b>bestregards</b><span>⋯</span></div>
+  <div class="scroll">
+   <div class="row"><div class="quota"><div class="pips" aria-hidden="true"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></div><span class="mono">3 из 5</span></div><button class="link mono" type="button">История</button></div>
+   <div class="seg" role="group" aria-label="Режим">
+    <button type="button" aria-pressed="false">С HR</button>
+    <button type="button" aria-pressed="true">С коллегами</button>
+    <button type="button" aria-pressed="false">С начальством</button>
+    <button type="button" aria-pressed="false">На человеческий</button>
+   </div>
+   <div class="field"><label class="mono" for="a1">Как есть</label>
+    <textarea id="a1">Ты опять не сделал, что обещал.</textarea>
+    <div class="hint mono muted"><span>Готовый пример · без AI</span><span>31/6000</span></div></div>
+   <div class="level" role="group" aria-label="Уровень">
+    <button type="button" aria-pressed="false">Почти человек<span class="bars"><i class="on"></i><i></i><i></i></span></button>
+    <button type="button" aria-pressed="true">Корпоративный сотрудник<span class="bars"><i class="on"></i><i class="on"></i><i></i></span></button>
+    <button type="button" aria-pressed="false">HR-директор 3000<span class="bars"><i class="on"></i><i class="on"></i><i class="on"></i></span></button>
+   </div>
+  </div>
+  <div class="main-btn">Перевести</div>
+ </div>
+ <figcaption><b>1. Главный экран</b>Режим, оригинал, уровень. «Перевести» — нативная MainButton Telegram с акцентным цветом. Квота всегда видна.</figcaption>
+</figure>
+
+<figure>
+ <div class="phone" data-theme="light">
+  <div class="tg-bar"><span>Назад</span><b>bestregards</b><span>⋯</span></div>
+  <div class="scroll">
+   <div class="memo">
+    <div class="memo-head"><span class="tag tag-accent">AI-перевод</span><span class="mono muted">Уровень 2</span></div>
+    <p class="memo-body">Давайте уточним статус задачи: нам важно синхронизироваться по срокам и вовремя увидеть возможные риски.</p>
+   </div>
+   <p class="mono muted">Исходный текст: «Ты опять не сделал, что обещал.»</p>
+   <button class="btn btn-block" type="button">Другой вариант · спишет 1 из 3</button>
+   <button class="btn btn-block" type="button">Отправить в чат…</button>
+   <p class="muted" style="font-size:14px">Сатирический перевод. Проверьте текст перед отправкой.</p>
+  </div>
+  <div class="main-btn"><svg width="22" height="22"><use href="#i-copy"/></svg>Скопировать</div>
+ </div>
+ <figcaption><b>2. Результат</b>Главное действие — «Копировать». После нажатия подпись на 1,5 с меняется на «Скопировано» и срабатывает лёгкая вибрация.</figcaption>
+</figure>
+
+<figure>
+ <div class="phone" data-theme="light">
+  <div class="tg-bar"><span>Закрыть</span><b>bestregards</b><span>⋯</span></div>
+  <div class="scroll"><div class="seg"><button>С HR</button><button>С коллегами</button><button>С начальством</button><button>На человеческий</button></div></div>
+  <div class="scrim"></div>
+  <div class="sheet" role="dialog" aria-label="Закончились бесплатные переводы">
+   <h3>На сегодня синергия закончилась</h3>
+   <p class="muted" style="font-size:14px">Бесплатные переводы обновятся в 00:00. Готовые примеры доступны всегда.</p>
+   <button class="link" type="button" style="align-self:center;min-height:44px">Понятно</button>
+  </div>
+ </div>
+ <figcaption><b>3. Квота закончилась</b>Шторка без покупок: переводы обновятся в 00:00, готовые примеры доступны.</figcaption>
+</figure>
+
+<figure>
+ <div class="phone" data-theme="dark">
+  <div class="tg-bar"><span>Назад</span><b>Рабочий чат</b><span>⋯</span></div>
+  <div class="chat-bg">
+   <div class="bubble">Когда будет готово?</div>
+   <div class="bubble me">Чтобы обеспечить нужное качество, предлагаю уточнить сроки и приоритеты.<small>via @bestregardsbot</small></div>
+  </div>
+  <div class="inline-list">
+   <div class="inline-item"><div class="ic">→</div><div><p class="t">Перевести: «не успеваю»</p><p class="muted">С коллегами · Корпоративный сотрудник</p></div></div>
+  </div>
+  <div class="chat-input">@bestregardsbot hr2: не успеваю</div>
+ </div>
+ <figcaption><b>4. Inline-режим (тёмная тема)</b>Результат появляется сразу, AI вызывается после выбора. Режим и уровень — необязательный префикс. Сообщение подписывается «via @bestregardsbot».</figcaption>
+</figure>
+
+</div>
+</body>
+</html>

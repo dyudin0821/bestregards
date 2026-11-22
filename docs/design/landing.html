@@ -1,0 +1,225 @@
+<!doctype html>
+<html lang="ru" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>bestregards — переводчик с корпоративного языка и обратно</title>
+<meta name="description" content="Вставьте мысль как есть и скопируйте в рабочий чат так, как принято. Переводчик с корпоративного языка и обратно в Telegram.">
+<link rel="stylesheet" href="tokens.css">
+<style>
+header{border-bottom:var(--border);background:var(--paper);position:sticky;top:0;z-index:5}
+header .wrap{display:flex;align-items:center;justify-content:space-between;min-height:64px;gap:var(--s4)}
+nav{display:flex;gap:var(--s5);font-weight:500}
+nav a{text-decoration:none;padding:var(--s2) 0}
+nav a:hover{text-decoration:underline;text-underline-offset:4px}
+.head-actions{display:flex;gap:var(--s2);align-items:center}
+.head-actions .btn{min-height:40px;padding:0 var(--s4);font-size:14px}
+section{padding:var(--s8) 0;border-bottom:var(--border)}
+.hero{padding:var(--s7) 0 var(--s8)}
+.hero h1{max-width:12ch;margin:var(--s4) 0}
+.hero h1 em{font-style:normal;background:var(--accent);color:var(--on-accent);padding:0 .12em}
+.lead{font-size:clamp(18px,2vw,22px);max-width:34em;color:var(--muted)}
+.cta-row{display:flex;flex-wrap:wrap;align-items:center;gap:var(--s5);margin-top:var(--s6)}
+.qr{display:flex;align-items:center;gap:var(--s3);font-size:14px;color:var(--muted)}
+.qr .code{width:72px;height:72px;border:var(--border);background:
+ conic-gradient(var(--ink) 25%,transparent 0 50%,var(--ink) 0 75%,transparent 0) 0 0/18px 18px,var(--surface)}
+.demo{margin-top:var(--s7)}
+.demo-tabs{margin-bottom:var(--s4);max-width:640px}
+.demo-grid{display:grid;grid-template-columns:1fr 1fr;gap:var(--s5);align-items:stretch}
+.raw{border:var(--border);background:var(--surface);padding:var(--s4);display:flex;flex-direction:column;gap:var(--s3)}
+.raw p{font-size:20px;line-height:1.45}
+.raw .tag,.memo-head .tag{align-self:flex-start}
+.hero h1 em{-webkit-box-decoration-break:clone;box-decoration-break:clone}
+.demo-note{margin-top:var(--s4);display:flex;gap:var(--s3);flex-wrap:wrap;align-items:center}
+.steps,.modes,.prices{display:grid;gap:var(--s5)}
+.steps{grid-template-columns:repeat(3,1fr);margin-top:var(--s6)}
+.step{border-top:var(--border);padding-top:var(--s4)}
+.step .num{font:600 40px/1 var(--mono)}
+.step h3{margin:var(--s3) 0 var(--s2)}
+.modes{grid-template-columns:repeat(4,1fr);margin-top:var(--s6)}
+.mode{border:var(--border);background:var(--surface);padding:var(--s4);min-height:180px;display:flex;flex-direction:column;justify-content:space-between;gap:var(--s4)}
+.mode.alt{background:var(--ink);color:var(--paper)}
+.levels{margin-top:var(--s6);max-width:720px}
+.inline-wrap{display:grid;grid-template-columns:1fr 1fr;gap:var(--s7);align-items:center}
+.chat{border:var(--border);background:var(--surface);box-shadow:var(--shadow);max-width:420px;width:100%;justify-self:center}
+.chat-top{padding:var(--s3) var(--s4);border-bottom:var(--border);font-weight:700}
+.chat-body{padding:var(--s4);display:flex;flex-direction:column;gap:var(--s3);min-height:220px}
+.bubble{max-width:88%;padding:var(--s3);border:var(--border);background:var(--paper)}
+.bubble.me{align-self:flex-end;background:var(--accent);color:var(--on-accent);border-color:#111}
+.bubble small{display:block;margin-top:6px;font:500 12px var(--mono);opacity:.75}
+.chat-input{border-top:var(--border);padding:var(--s3) var(--s4);font:500 15px var(--mono)}
+.prices{grid-template-columns:repeat(2,1fr);margin-top:var(--s6)}
+.price{border:var(--border);background:var(--surface);padding:var(--s5);display:flex;flex-direction:column;gap:var(--s3)}
+.price strong{font-size:44px;line-height:1;font-weight:900}
+.price.hot{background:var(--accent);color:var(--on-accent);border-color:#111;box-shadow:var(--shadow)}
+details{border-top:var(--border);padding:var(--s4) 0}
+details:last-of-type{border-bottom:var(--border)}
+summary{cursor:pointer;font-weight:700;font-size:20px;min-height:var(--tap);display:flex;align-items:center}
+details p{margin-top:var(--s2);color:var(--muted);max-width:46em}
+.final{text-align:left;background:var(--ink);color:var(--paper)}
+.final h2{max-width:14ch}
+.final .btn-primary{margin-top:var(--s5)}
+footer{padding:var(--s6) 0;font-size:14px;color:var(--muted)}
+footer .wrap{display:flex;flex-wrap:wrap;gap:var(--s4) var(--s6);justify-content:space-between}
+footer a{margin-right:var(--s4)}
+@media (max-width:640px){
+ #theme{display:none}
+ .head-actions .btn{white-space:nowrap;padding:0 var(--s3)}
+ .btn{white-space:normal;text-align:center}
+}
+@media (max-width:900px){
+ nav{display:none}
+ .demo-grid,.inline-wrap{grid-template-columns:1fr}
+ .steps,.prices{grid-template-columns:1fr}
+ .modes{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+ <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="square"/></symbol>
+ <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2"/><path d="M16 8V4H4v12h4" fill="none" stroke="currentColor" stroke-width="2"/></symbol>
+</svg>
+
+<header>
+ <div class="wrap">
+  <a class="brand" href="#"><b>b</b>bestregards</a>
+  <nav aria-label="Разделы"><a href="#how">Как это работает</a><a href="#modes">Режимы</a><a href="#price">Квоты</a><a href="#faq">Вопросы</a></nav>
+  <div class="head-actions">
+   <button class="btn" id="theme" type="button" aria-pressed="false">Тёмная тема</button>
+   <a class="btn btn-primary" href="https://t.me/bestregardsbot?start=landing">Открыть в Telegram</a>
+  </div>
+ </div>
+</header>
+
+<main>
+<section class="hero">
+ <div class="wrap">
+  <span class="tag tag-accent">Переводчик с корпоративного языка и обратно</span>
+  <h1>Скажи <em>как есть.</em> Отправь как надо.</h1>
+  <p class="lead">Вставьте мысль, выберите режим и уровень, скопируйте результат в рабочий чат. Или переведите чужое письмо на человеческий и узнайте, что имелось в виду.</p>
+  <div class="cta-row">
+   <a class="btn btn-primary" href="https://t.me/bestregardsbot?start=landing_hero">Открыть в Telegram <svg width="20" height="20"><use href="#i-arrow"/></svg></a>
+   <div class="qr"><div class="code" role="img" aria-label="QR-код со ссылкой на бота (макет)"></div><span>Сидите за компьютером?<br>Наведите камеру телефона.</span></div>
+  </div>
+
+  <div class="demo" aria-labelledby="demo-title">
+   <p id="demo-title" class="mono muted">Попробуйте без входа</p>
+   <div class="seg demo-tabs" role="group" aria-label="Режим примера">
+    <button type="button" aria-pressed="true" data-i="0">С HR</button>
+    <button type="button" aria-pressed="false" data-i="1">С коллегами</button>
+    <button type="button" aria-pressed="false" data-i="2">С начальством</button>
+    <button type="button" aria-pressed="false" data-i="3">На человеческий</button>
+   </div>
+   <div class="demo-grid">
+    <div class="raw"><span class="tag" id="from-tag">Как есть</span><p id="raw">Потому что у вас написано «удалёнка» и «зарплата».</p></div>
+    <div class="memo" aria-live="polite">
+     <div class="memo-head"><span class="tag tag-accent" id="to-tag">Как отправить</span><span class="mono muted">Корпоративный сотрудник</span></div>
+     <p class="memo-body" id="out">Меня привлекает гибкий формат работы и прозрачная система мотивации — это хорошо резонирует с моими ценностями.</p>
+     <div class="memo-foot"><button class="btn" type="button" id="copy"><svg width="20" height="20"><use href="#i-copy"/></svg>Скопировать</button></div>
+    </div>
+   </div>
+   <p class="demo-note"><span class="tag">Готовый пример · без AI</span><span class="muted">Свой текст переводит AI — это в Telegram.</span></p>
+  </div>
+ </div>
+</section>
+
+<section id="how">
+ <div class="wrap">
+  <h2>Три действия. Ноль эмоций в чате.</h2>
+  <div class="steps">
+   <div class="step"><div class="num">01</div><h3>Вставьте как есть</h3><p class="muted">Что на самом деле думаете или что вам написали.</p></div>
+   <div class="step"><div class="num">02</div><h3>Выберите режим и уровень</h3><p class="muted">HR, коллеги, начальство — и насколько корпоративно.</p></div>
+   <div class="step"><div class="num">03</div><h3>Скопируйте и отправьте</h3><p class="muted">Готовый текст — в буфер или прямо в чат через бота.</p></div>
+  </div>
+ </div>
+</section>
+
+<section id="modes">
+ <div class="wrap">
+  <h2>Четыре режима</h2>
+  <div class="modes">
+   <div class="mode"><span class="mono">01</span><div><h3>С HR</h3><p class="muted">Собеседования и офферы</p></div></div>
+   <div class="mode"><span class="mono">02</span><div><h3>С коллегами</h3><p class="muted">Чаты, правки и созвоны</p></div></div>
+   <div class="mode"><span class="mono">03</span><div><h3>С начальством</h3><p class="muted">Дедлайны и личные границы</p></div></div>
+   <div class="mode alt"><span class="mono">04</span><div><h3>На человеческий</h3><p>Что они имели в виду</p></div></div>
+  </div>
+  <div class="level levels" role="group" aria-label="Уровни (пример)">
+   <button type="button" aria-pressed="false"><span class="bars"><i class="on"></i><i></i><i></i></span>Почти человек</button>
+   <button type="button" aria-pressed="true"><span class="bars"><i class="on"></i><i class="on"></i><i></i></span>Корпоративный сотрудник</button>
+   <button type="button" aria-pressed="false"><span class="bars"><i class="on"></i><i class="on"></i><i class="on"></i></span>HR-директор 3000</button>
+  </div>
+ </div>
+</section>
+
+<section>
+ <div class="wrap inline-wrap">
+  <div>
+   <span class="tag">Прямо в чате</span>
+   <h2 style="margin:var(--s4) 0">Напишите бота в любом чате — и вставьте готовый ответ.</h2>
+   <p class="lead">Ничего копировать не нужно: выберите результат, и сообщение уйдёт в рабочий чат уже переведённым.</p>
+  </div>
+  <div class="chat" aria-label="Пример inline-режима (макет)">
+   <div class="chat-top">Рабочий чат</div>
+   <div class="chat-body">
+    <div class="bubble">Когда будет готово?</div>
+    <div class="bubble me">Чтобы обеспечить нужное качество, предлагаю уточнить сроки и приоритеты.<small>via @bestregardsbot</small></div>
+   </div>
+   <div class="chat-input">@bestregardsbot hr2: не успеваю</div>
+  </div>
+ </div>
+</section>
+
+<section id="price">
+ <div class="wrap">
+  <h2>Бесплатно, без регистрации</h2>
+  <div class="prices">
+   <div class="price hot"><span class="tag" style="border-color:#111">Сайт</span><strong>3</strong><p>AI-перевода в сутки гостю, без регистрации. Готовые примеры — без ограничений.</p></div>
+   <div class="price"><span class="tag">Telegram</span><strong>5</strong><p>AI-переводов в сутки в Mini App. Готовые примеры — без ограничений.</p></div>
+  </div>
+ </div>
+</section>
+
+<section id="faq">
+ <div class="wrap">
+  <h2 style="margin-bottom:var(--s6)">Вопросы</h2>
+  <details><summary>Вы читаете мои тексты?</summary><p>Нет. Текст уходит на перевод и не сохраняется на нашей стороне. История хранится только у вас на устройстве. В базе — анонимный идентификатор и счётчик переводов за день.</p></details>
+  <details><summary>Это серьёзно?</summary><p>Это сатира. Обратный перевод — шуточная интерпретация, а не чтение мыслей. Проверяйте текст перед отправкой.</p></details>
+  <details><summary>Что делать, если бесплатные переводы закончились?</summary><p>Готовые примеры остаются доступными. Для своих текстов подождите следующих суток или откройте приложение в Telegram: там переводов больше.</p></details>
+ </div>
+</section>
+
+<section class="final">
+ <div class="wrap">
+  <h2>Лучше один раз перевести.</h2>
+  <a class="btn btn-primary" href="https://t.me/bestregardsbot?start=landing_footer">Открыть в Telegram <svg width="20" height="20"><use href="#i-arrow"/></svg></a>
+ </div>
+</section>
+</main>
+
+<footer>
+ <div class="wrap">
+  <span>© bestregards</span>
+  <span><a href="#">Политика конфиденциальности</a><a href="#">Условия</a><a href="#">Поддержка</a></span>
+ </div>
+</footer>
+
+<script>
+const pairs=[
+ {raw:'Потому что у вас написано «удалёнка» и «зарплата».',out:'Меня привлекает гибкий формат работы и прозрачная система мотивации — это хорошо резонирует с моими ценностями.',from:'Как есть',to:'Как отправить'},
+ {raw:'Ты опять не сделал, что обещал.',out:'Хочу синхронизироваться по статусу нашей договорённости и понять, какие есть блокеры.',from:'Как есть',to:'Как отправить'},
+ {raw:'Это нельзя сделать за два дня.',out:'Чтобы обеспечить нужное качество, предлагаю пересогласовать срок и приоритеты.',from:'Как есть',to:'Как отправить'},
+ {raw:'Давайте вынесем это в оффлайн.',out:'Не хочу обсуждать это при всех.',from:'Корпоративный текст',to:'На человеческом'}
+];
+const $=s=>document.querySelector(s);
+document.querySelectorAll('.demo-tabs button').forEach(b=>b.addEventListener('click',()=>{
+ document.querySelectorAll('.demo-tabs button').forEach(x=>x.setAttribute('aria-pressed',x===b));
+ const p=pairs[b.dataset.i];$('#raw').textContent=p.raw;$('#out').textContent=p.out;$('#from-tag').textContent=p.from;$('#to-tag').textContent=p.to;
+}));
+$('#copy').addEventListener('click',async e=>{const t=e.currentTarget;try{await navigator.clipboard.writeText($('#out').textContent)}catch{}const o=t.lastChild.textContent;t.lastChild.textContent='Скопировано';setTimeout(()=>t.lastChild.textContent=o,1500)});
+const root=document.documentElement,tb=$('#theme');
+if(matchMedia('(prefers-color-scheme: dark)').matches){root.dataset.theme='dark';tb.setAttribute('aria-pressed',true);tb.textContent='Светлая тема'}
+tb.addEventListener('click',()=>{const d=root.dataset.theme!=='dark';root.dataset.theme=d?'dark':'light';tb.setAttribute('aria-pressed',d);tb.textContent=d?'Светлая тема':'Тёмная тема'});
+</script>
+</body>
+</html>
