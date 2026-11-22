@@ -1,0 +1,9 @@
+name: "CodeQL config"
+
+queries:
+  - uses: security-extended
+
+paths-ignore:
+  - web/node_modules
+  - web/dist
+  - internal/store/db
