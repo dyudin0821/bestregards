@@ -1,0 +1,164 @@
+# Default deny for the service's own pods, then exactly what each part needs. Needs a CNI that enforces
+# NetworkPolicy (Calico, Cilium...). Adjust the selectors marked EDIT to your cluster.
+#
+# The database pods are not covered by the default deny: the operator's instance manager needs the
+# Kubernetes API and, with backups, an object store, so their egress stays open. Their ingress is closed
+# by the "database" policy below.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny
+  labels:
+    app.kubernetes.io/name: bestregards
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: bestregards
+  policyTypes: [Ingress, Egress]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: app
+  labels:
+    app.kubernetes.io/name: bestregards
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: bestregards
+      app.kubernetes.io/component: app
+  policyTypes: [Ingress, Egress]
+  ingress:
+    - from: # EDIT: where the Gateway's data plane runs (Envoy Gateway: envoy-gateway-system; Cilium and
+        # Istio differ: check the pods behind the Gateway with `kubectl get pods -A -l gateway.networking.k8s.io/gateway-name=bestregards`)
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: envoy-gateway-system
+      ports:
+        - port: 8080
+    - from: # EDIT: the namespace of your Prometheus
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: monitoring
+      ports:
+        - port: 9090
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - {port: 53, protocol: UDP}
+        - {port: 53, protocol: TCP}
+    # The AI provider, Telegram and Cloudflare, all over https. Private ranges and the cloud metadata
+    # address are left out, so a forged URL could not reach the cluster's own services.
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except: [10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 169.254.0.0/16, 100.64.0.0/10]
+      ports:
+        - port: 443
+    - to:
+        - podSelector:
+            matchLabels:
+              cnpg.io/cluster: bestregards-db
+      ports:
+        - port: 5432
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: purge
+  labels:
+    app.kubernetes.io/name: bestregards
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: bestregards
+      app.kubernetes.io/component: purge
+  policyTypes: [Ingress, Egress]
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - {port: 53, protocol: UDP}
+        - {port: 53, protocol: TCP}
+    - to:
+        - podSelector:
+            matchLabels:
+              cnpg.io/cluster: bestregards-db
+      ports:
+        - port: 5432
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: setup-webhook
+  labels:
+    app.kubernetes.io/name: bestregards
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: bestregards
+      app.kubernetes.io/component: setup-webhook
+  policyTypes: [Ingress, Egress]
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+          podSelector:
+            matchLabels:
+              k8s-app: kube-dns
+      ports:
+        - {port: 53, protocol: UDP}
+        - {port: 53, protocol: TCP}
+    - to: # only Telegram's Bot API
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except: [10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 169.254.0.0/16, 100.64.0.0/10]
+      ports:
+        - port: 443
+---
+# Who may reach PostgreSQL: the service and the purge job, the instances of the cluster among themselves
+# (replication, and the status port 8000 the operator polls), and the operator itself.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: database
+  labels:
+    app.kubernetes.io/name: bestregards-db
+spec:
+  podSelector:
+    matchLabels:
+      cnpg.io/cluster: bestregards-db
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: bestregards
+      ports:
+        - port: 5432
+    - from:
+        - podSelector:
+            matchLabels:
+              cnpg.io/cluster: bestregards-db
+      ports:
+        - {port: 5432, protocol: TCP}
+        - {port: 8000, protocol: TCP}
+    - from: # EDIT: the namespace of the CloudNativePG operator
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: cnpg-system
+      ports:
+        - {port: 5432, protocol: TCP}
+        - {port: 8000, protocol: TCP}

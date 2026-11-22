@@ -1,7 +1,8 @@
 .mcp.json
 .quadcodeai/
 node_modules/
-dist/
+web/dist/*
+!web/dist/.gitkeep
 .env
 .env.*
 !.env.example
