@@ -142,7 +142,7 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request) {
 	defer func() {
 		p := recover()
 		if p != nil && p != http.ErrAbortHandler {
-			s.Logger.ErrorContext(r.Context(), "panic", "path", r.URL.Path, "panic", p, "stack", string(debug.Stack()))
+			s.Logger.ErrorContext(r.Context(), "panic", "path", logSafe(r.URL.Path), "panic", p, "stack", string(debug.Stack()))
 			span.RecordError(fmt.Errorf("panic: %v", p))
 			if !rec.wrote {
 				writeError(rec, http.StatusInternalServerError, "Что-то пошло не так.")
@@ -163,13 +163,18 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request) {
 			if rec.status >= 500 {
 				level = slog.LevelError // server errors must stand out in the log stream
 			}
-			s.Logger.Log(r.Context(), level, "request", "method", r.Method, "route", route, "path", r.URL.Path, "status", rec.status, "ms", took.Milliseconds())
+			s.Logger.Log(r.Context(), level, "request", "method", r.Method, "route", route, "path", logSafe(r.URL.Path), "status", rec.status, "ms", took.Milliseconds())
 		}
 		if p == http.ErrAbortHandler {
 			panic(p) // net/http aborts the response quietly; recovering would hide that from it
 		}
 	}()
 	s.mux.ServeHTTP(rec, r)
+}
+
+// logSafe strips line breaks from a client-supplied value so it cannot forge log lines.
+func logSafe(s string) string {
+	return strings.ReplaceAll(strings.ReplaceAll(s, "\n", " "), "\r", " ")
 }
 
 // routeOf is the mux pattern that served r, which keeps metric labels and span names few.

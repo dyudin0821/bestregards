@@ -93,7 +93,7 @@ func (h *Handler) say(ctx context.Context, chat int64, text string) { h.send(ctx
 
 func (h *Handler) send(ctx context.Context, chat int64, text, appURL string) {
 	if err := h.Telegram.SendMessage(ctx, chat, text, appURL); err != nil {
-		h.Log.WarnContext(ctx, "send message", "chat", chat, "err", err)
+		h.Log.WarnContext(ctx, "send message", "chat", chat, "err", logSafe(err.Error()))
 	}
 }
 

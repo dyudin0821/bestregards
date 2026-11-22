@@ -94,7 +94,7 @@ func (h *Handler) route(ctx context.Context, adminID int64, data string) Panel {
 		p = h.menuPanel(ctx)
 	}
 	if err != nil {
-		h.Log.ErrorContext(ctx, "admin panel", "data", data, "err", err)
+		h.Log.ErrorContext(ctx, "admin panel", "data", logSafe(data), "err", err)
 		return Panel{Text: "Не получилось загрузить данные. Попробуйте ещё раз.", Rows: nav(data)}
 	}
 	return p
@@ -204,10 +204,15 @@ func (h *Handler) userPanel(ctx context.Context, id int64) (Panel, error) {
 	return Panel{Text: b.String(), Rows: nav(cbUserPre + strconv.FormatInt(id, 10))}, nil
 }
 
+// logSafe strips line breaks from a value that came from outside so it cannot forge log lines.
+func logSafe(s string) string {
+	return strings.ReplaceAll(strings.ReplaceAll(s, "\n", " "), "\r", " ")
+}
+
 // audit records who did what in the log, where the operator's log pipeline keeps it. Every
 // action that changes availability goes through it.
 func (h *Handler) audit(ctx context.Context, adminID int64, action string) {
-	h.Log.InfoContext(ctx, "admin action", "audit", true, "admin", adminID, "action", action)
+	h.Log.InfoContext(ctx, "admin action", "audit", true, "admin", adminID, "action", logSafe(action))
 }
 
 // switchFree turns AI translations off or on and shows the menu.
