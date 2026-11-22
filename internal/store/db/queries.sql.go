@@ -212,19 +212,6 @@ func (q *Queries) PurgeEventsChunk(ctx context.Context, arg PurgeEventsChunkPara
 	return result.RowsAffected(), nil
 }
 
-const purgeQuota = `-- name: PurgeQuota :execrows
-DELETE FROM quota_usage WHERE day < $1
-`
-
-// Per-day counters of everyone; only the current day is ever read.
-func (q *Queries) PurgeQuota(ctx context.Context, day time.Time) (int64, error) {
-	result, err := q.db.Exec(ctx, purgeQuota, day)
-	if err != nil {
-		return 0, err
-	}
-	return result.RowsAffected(), nil
-}
-
 const purgeGuests = `-- name: PurgeGuests :execrows
 DELETE FROM users WHERE telegram_id < 0 AND created_at < $1
 `
@@ -232,6 +219,19 @@ DELETE FROM users WHERE telegram_id < 0 AND created_at < $1
 // Their quota rows go with them (ON DELETE CASCADE).
 func (q *Queries) PurgeGuests(ctx context.Context, createdAt time.Time) (int64, error) {
 	result, err := q.db.Exec(ctx, purgeGuests, createdAt)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected(), nil
+}
+
+const purgeQuota = `-- name: PurgeQuota :execrows
+DELETE FROM quota_usage WHERE day < $1
+`
+
+// Per-day counters of everyone; only the current day is ever read.
+func (q *Queries) PurgeQuota(ctx context.Context, day time.Time) (int64, error) {
+	result, err := q.db.Exec(ctx, purgeQuota, day)
 	if err != nil {
 		return 0, err
 	}
