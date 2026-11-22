@@ -1,5 +1,10 @@
 # bestregards
 
+[![Tests](https://github.com/dyudin0821/bestregards/actions/workflows/test.yml/badge.svg?branch=main)](https://github.com/dyudin0821/bestregards/actions/workflows/test.yml)
+[![Lint](https://github.com/dyudin0821/bestregards/actions/workflows/lint.yml/badge.svg?branch=main)](https://github.com/dyudin0821/bestregards/actions/workflows/lint.yml)
+[![Security](https://github.com/dyudin0821/bestregards/actions/workflows/security.yml/badge.svg?branch=main)](https://github.com/dyudin0821/bestregards/actions/workflows/security.yml)
+[![Image](https://github.com/dyudin0821/bestregards/actions/workflows/image.yml/badge.svg?branch=main)](https://github.com/dyudin0821/bestregards/actions/workflows/image.yml)
+
 **Переводчик между человеческой речью и корпоративным языком, и обратно.**
 
 «Давай созвонимся» превращается в «предлагаю синкнуться и выровнять ожидания», а «синергия на уровне стейкхолдеров» обратно в «вы все друг другу что-то должны». Проект сатирический: цель в шуме и «вау», а не в выручке. Платежей нет.
