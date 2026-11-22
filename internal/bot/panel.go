@@ -212,7 +212,7 @@ func logSafe(s string) string {
 // audit records who did what in the log, where the operator's log pipeline keeps it. Every
 // action that changes availability goes through it.
 func (h *Handler) audit(ctx context.Context, adminID int64, action string) {
-	h.Log.InfoContext(ctx, "admin action", "audit", true, "admin", adminID, "action", logSafe(action))
+	h.Log.InfoContext(ctx, "admin action", "audit", true, "admin", logSafe(strconv.FormatInt(adminID, 10)), "action", logSafe(action))
 }
 
 // switchFree turns AI translations off or on and shows the menu.
