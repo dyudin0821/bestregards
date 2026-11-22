@@ -61,7 +61,6 @@ type Server struct {
 	authLimiter  *ipLimiter
 	aiLimiter    *ipLimiter
 	evLimiter    *ipLimiter
-	buyLimiter   *ipLimiter
 	meLimiter    *ipLimiter
 	guestLimiter *ipLimiter
 	readiness    readyCache
