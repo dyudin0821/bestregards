@@ -229,3 +229,22 @@ test('guest login maps server errors to friendly Russian messages', async () => 
   assert.equal((await loginAsGuest('t')).token, 'jwt');
   delete globalThis.fetch;
 });
+
+test('landing QR: the marker becomes an SVG that paints exactly the dark modules of the code', async () => {
+  const {injectQr} = await import('../qr.js');
+  const {default: QRCode} = await import('qrcode');
+  const url = 'https://t.me/WithBestregards_bot?startapp=landing_qr';
+
+  const html = injectQr(`<p>a</p><div class="code" data-qr="${url}"></div><p>b</p>`);
+  assert.match(html, /^<p>a<\/p><div class="code"><svg [^>]*viewBox="0 0 (\d+) \1"[^>]*><path [^>]*\/><\/svg><\/div><p>b<\/p>$/);
+  assert.doesNotMatch(html, /data-qr/);
+
+  const painted = new Set();
+  for (const [, x, y, run] of html.matchAll(/M(\d+) (\d+)h(\d+)v1h-\3z/g)) {
+    for (let i = 0; i < Number(run); i++) painted.add(`${Number(x) + i},${y}`);
+  }
+  const {size, data} = QRCode.create(url, {errorCorrectionLevel: 'L'}).modules;
+  const dark = new Set();
+  for (let i = 0; i < size * size; i++) if (data[i]) dark.add(`${i % size + 2},${Math.floor(i / size) + 2}`);
+  assert.deepEqual(painted, dark);
+});

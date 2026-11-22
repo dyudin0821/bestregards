@@ -17,6 +17,7 @@
     "vanilla-cookieconsent": "^3.3.0"
   },
   "devDependencies": {
+    "qrcode": "^1.5.4",
     "vite": "^6.1.0"
   }
 }

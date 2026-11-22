@@ -206,10 +206,10 @@ func TestSetupRegistersTheWebhookWithTheSecretAndLimitedUpdates(t *testing.T) {
 
 func TestParseCommand(t *testing.T) {
 	for in, want := range map[string][2]string{
-		"/start":                {"start", ""},
-		"/start@bestregardsbot": {"start", ""},
-		"/ADMIN user  42 ":      {"admin", "user  42"},
-		"/admin@bot user 42":    {"admin", "user 42"},
+		"/start":                     {"start", ""},
+		"/start@WithBestregards_bot": {"start", ""},
+		"/ADMIN user  42 ":           {"admin", "user  42"},
+		"/admin@bot user 42":         {"admin", "user 42"},
 	} {
 		cmd, arg, ok := parseCommand(in)
 		if !ok || cmd != want[0] || arg != want[1] {

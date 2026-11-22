@@ -16,7 +16,7 @@ import {
 
 const DEFAULT_MODE = 'colleagues';
 const MAX_LENGTH = 6000;
-const BOT_LINK = 'https://t.me/bestregardsbot?start=web';
+const BOT_LINK = 'https://t.me/WithBestregards_bot?startapp=web';
 
 const initialTheme = () => telegramScheme ?? readTheme(matchMedia('(prefers-color-scheme: dark)').matches);
 const pairResult = (pair, preview) => ({source: 'pair', pairId: pair.id, resultId: newResultId(), text: pair.output, input: pair.input, mode: pair.mode, preview});
