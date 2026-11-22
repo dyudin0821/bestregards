@@ -131,7 +131,7 @@ func FromEnv(getenv func(string) string) (Config, error) {
 
 	c.Database = Database{
 		URL:      e.required("DATABASE_URL"),
-		MaxConns: int32(e.integer("DB_MAX_CONNS", defaultDBMaxConns, minDBMaxConns, 1000)),
+		MaxConns: e.integer32("DB_MAX_CONNS", defaultDBMaxConns, minDBMaxConns, 1000),
 	}
 	c.Telegram = Telegram{
 		BotToken:      e.token("BOT_TOKEN"),

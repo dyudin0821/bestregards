@@ -80,6 +80,20 @@ func (e *env) integer(name string, fallback, lo, hi int) int {
 	return n
 }
 
+// integer32 is integer for values that must fit an int32.
+func (e *env) integer32(name string, fallback, lo, hi int32) int32 {
+	v := e.get(name)
+	if v == "" {
+		return fallback
+	}
+	n, err := strconv.ParseInt(v, 10, 32)
+	if err != nil || n < int64(lo) || n > int64(hi) {
+		e.fail("%s %q must be a whole number from %d to %d", name, v, lo, hi)
+		return fallback
+	}
+	return int32(n)
+}
+
 // number returns the variable as a finite number that is not negative, or fallback when empty.
 func (e *env) number(name string, fallback float64) float64 {
 	v := e.get(name)
